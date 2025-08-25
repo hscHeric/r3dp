@@ -11,4 +11,12 @@
 #ifndef R3DP_CORE
   #define R3DP_CORE
   #include "core/graph.hpp"
+  #include "core/rng.hpp"
 #endif  // !CORE
+
+#ifndef R3DP_GA
+  #define R3DP_GA
+  #include "genetic_algorithm/genetic_algorithm.hpp"
+  #include "genetic_algorithm/population.hpp"
+  #include "genetic_algorithm/r3d_decoder.hpp"
+#endif
