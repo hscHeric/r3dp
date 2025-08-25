@@ -20,7 +20,7 @@ namespace r3dp::ga {
      * @param chromosome O cromossomo a ser decodificado.
      * @return O valor da aptidão da solução.
      */
-    virtual uint64_t decode( const std::vector<uint8_t> &chromosome ) const = 0;
+    virtual uint64_t decode( std::vector<uint8_t> &chromosome ) = 0;
   };
 
 }  // namespace r3dp::ga

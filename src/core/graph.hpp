@@ -14,4 +14,8 @@ namespace r3dp::core {
 
   // Monta o grafo a partir da função de read_graph_from_file
   Graph build_graph_from( Vertex n, const std::set<Edge> &edges );
+
+  bool                     is_valid_fdr3( const Graph &g, const std::vector<uint8_t> &labels );
+  std::vector<std::size_t> violating_vertices_fdr3( const Graph                &g,
+                                                    const std::vector<uint8_t> &labels );
 }  // namespace r3dp::core

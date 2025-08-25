@@ -8,10 +8,10 @@ namespace r3dp::ga {
   Population::Population( const std::vector<std::vector<uint8_t>> &initialPopulation )
     : population( initialPopulation ), fitness( initialPopulation.size() ) {
     if ( population.empty() ) {
-      throw std::range_error( "Initial population cannot be empty." );
+      throw std::range_error( "A população inicial não pode ser vázia" );
     }
     if ( population[0].empty() ) {
-      throw std::range_error( "Chromosomes cannot be empty." );
+      throw std::range_error( "Chromossomos não podem ser vázios" );
     }
   }
 
@@ -32,21 +32,21 @@ namespace r3dp::ga {
 
   double Population::get_fitness( unsigned i ) const {
     if ( i >= size() ) {
-      throw std::range_error( "Invalid individual identifier." );
+      throw std::range_error( "[get_fitness] individuo fora dos limites" );
     }
     return fitness[i].first;
   }
 
   const std::vector<uint8_t> &Population::get_chromosome( unsigned i ) const {
     if ( i >= size() ) {
-      throw std::range_error( "Invalid individual identifier." );
+      throw std::range_error( "[get_chromosome] individuo fora dos limites" );
     }
     return population[fitness[i].second];
   }
 
   std::vector<uint8_t> &Population::get_chromosome_at( unsigned i ) {
     if ( i >= size() ) {
-      throw std::range_error( "Invalid individual identifier." );
+      throw std::range_error( "[get_chromosome_at] individuo fora dos limites" );
     }
     return population[i];
   }

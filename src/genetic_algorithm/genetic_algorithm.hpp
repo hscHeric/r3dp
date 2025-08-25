@@ -6,6 +6,8 @@
 #include <cmath>
 #include <memory>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace r3dp::ga {
   template <typename RNG, typename Decoder>
@@ -14,13 +16,13 @@ namespace r3dp::ga {
     GAEngine( const std::vector<Chromosome> &initial_population,
               double                         mutation_rate,
               double                         crossover_rate,
-              double                         elite_rate,  // <<< NOVO
+              double                         elite_rate,
               unsigned int                   tournament_size,
               unsigned int                   max_threads,
               RNG                           &rng,
-              const Decoder                 &decoder );
+              Decoder                       &decoder );
 
-    void evolve( unsigned generations = 1 );
+    std::pair<Chromosome, double> evolve();
 
     const Chromosome &get_best_chromosome() const;
 
@@ -38,12 +40,12 @@ namespace r3dp::ga {
 
     const double       mutation_rate;
     const double       crossover_rate;
-    const double       elite_rate;  // <<< NOVO: fração [0,1]
+    const double       elite_rate;
     const unsigned int tournament_size;
     const unsigned int max_threads;
 
-    RNG           &rng;
-    const Decoder &decoder;
+    RNG     &rng;
+    Decoder &decoder;
 
     std::unique_ptr<Population> population_current;
     std::unique_ptr<Population> population_next;
@@ -53,11 +55,11 @@ namespace r3dp::ga {
   GAEngine<RNG, Decoder>::GAEngine( const std::vector<Chromosome> &initial_population,
                                     double                         mutation_rate,
                                     double                         crossover_rate,
-                                    double                         elite_rate,  // <<< NOVO
+                                    double                         elite_rate,
                                     unsigned int                   tournament_size,
                                     unsigned int                   max_threads,
                                     RNG                           &rng,
-                                    const Decoder                 &decoder )
+                                    Decoder                       &decoder )
     : mutation_rate( mutation_rate )
     , crossover_rate( crossover_rate )
     , elite_rate( elite_rate )
@@ -99,67 +101,63 @@ namespace r3dp::ga {
   }
 
   template <typename RNG, typename Decoder>
-  void GAEngine<RNG, Decoder>::evolve( unsigned generations ) {
-    if ( generations == 0 ) {
-      return;
+  std::pair<Chromosome, double> GAEngine<RNG, Decoder>::evolve() {
+    const unsigned int pop_size = population_current->size();
+
+    // Preserve elitism
+    unsigned int elite_count = 0;
+    if ( elite_rate > 0.0 ) {
+      const double raw = elite_rate * static_cast<double>( pop_size );
+      elite_count      = static_cast<unsigned int>( std::floor( raw ) );
+      if ( elite_count == 0 && pop_size > 0 ) {
+        elite_count = 1;
+      }
+      if ( elite_count > pop_size ) {
+        elite_count = pop_size;
+      }
     }
 
-    for ( unsigned g = 0; g < generations; ++g ) {
-      const unsigned int pop_size = population_current->size();
-
-      // --- Cálculo do número de elites ---
-      unsigned int elite_count = 0;
-      if ( elite_rate > 0.0 ) {
-        const double raw = elite_rate * static_cast<double>( pop_size );
-        elite_count      = static_cast<unsigned int>( std::floor( raw ) );
-        if ( elite_count == 0 ) {
-          elite_count = 1;  // garante pelo menos 1 elite se elite_rate > 0
-        }
-        if ( elite_count > pop_size ) {
-          elite_count = pop_size;  // segurança (não deveria ocorrer)
-        }
-      }
-
-      // --- Copia a elite (já está ordenada por fitness: índice 0 é o melhor) ---
-      for ( unsigned int e = 0; e < elite_count; ++e ) {
-        const auto &elite_chrom                 = population_current->get_chromosome( e );
-        const auto  elite_fit                   = population_current->get_fitness( e );
-        population_next->get_chromosome_at( e ) = elite_chrom;
-        population_next->set_fitness( e, elite_fit );
-      }
-
-      // --- Geração dos demais indivíduos ---
-      for ( unsigned int i = elite_count; i < pop_size; ++i ) {
-        // Seleção de pais
-        unsigned int parent1_idx = tournament_selection();
-        unsigned int parent2_idx = tournament_selection();
-        while ( parent1_idx == parent2_idx ) {
-          parent2_idx = tournament_selection();
-        }
-
-        const Chromosome &parent1 = population_current->get_chromosome( parent1_idx );
-        const Chromosome &parent2 = population_current->get_chromosome( parent2_idx );
-        Chromosome        offspring;
-
-        // Crossover
-        if ( rng.rand() < crossover_rate ) {
-          one_point_crossover( offspring, parent1, parent2 );
-        } else {
-          offspring = ( rng.rand() < 0.5 ) ? parent1 : parent2;
-        }
-
-        // Mutação
-        mutation( offspring );
-
-        // Avaliação e gravação
-        population_next->get_chromosome_at( i ) = offspring;
-        population_next->set_fitness( i, decoder.decode( offspring ) );
-      }
-
-      // Ordena e troca buffers
-      population_next->sort_fitness();
-      std::swap( population_current, population_next );
+    for ( unsigned int e = 0; e < elite_count; ++e ) {
+      const auto &elite_chrom                 = population_current->get_chromosome( e );
+      const auto  elite_fit                   = population_current->get_fitness( e );
+      population_next->get_chromosome_at( e ) = elite_chrom;
+      population_next->set_fitness( e, elite_fit );
     }
+
+    // Generate new population through crossover and mutation
+#pragma omp parallel for num_threads( max_threads )
+    for ( int i = elite_count; i < pop_size; ++i ) {
+      unsigned int parent1_idx = tournament_selection();
+      unsigned int parent2_idx = tournament_selection();
+      while ( parent1_idx == parent2_idx ) {
+        parent2_idx = tournament_selection();
+      }
+
+      const Chromosome &parent1 = population_current->get_chromosome( parent1_idx );
+      const Chromosome &parent2 = population_current->get_chromosome( parent2_idx );
+      Chromosome        offspring;
+
+      if ( rng.rand() < crossover_rate ) {
+        one_point_crossover( offspring, parent1, parent2 );
+      } else {
+        offspring = ( rng.rand() < 0.5 ) ? parent1 : parent2;
+      }
+
+      mutation( offspring );
+
+      population_next->get_chromosome_at( i ) = offspring;
+    }
+
+    // Evaluate fitness of the new population
+#pragma omp parallel for num_threads( max_threads )
+    for ( int i = elite_count; i < pop_size; ++i ) {
+      population_next->set_fitness( i, decoder.decode( population_next->get_chromosome_at( i ) ) );
+    }
+
+    population_next->sort_fitness();
+    std::swap( population_current, population_next );
+
+    return { get_best_chromosome(), best_fitness() };
   }
 
   template <typename RNG, typename Decoder>

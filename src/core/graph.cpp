@@ -65,4 +65,64 @@ namespace r3dp::core {
     return g;
   }
 
+  bool is_valid_fdr3( const Graph &g, const std::vector<uint8_t> &labels ) {
+    using VD = boost::graph_traits<Graph>::vertex_descriptor;
+
+    const auto n = boost::num_vertices( g );
+    if ( labels.size() != n )
+      throw std::invalid_argument( "labels.size() != num_vertices(graph)" );
+
+    auto closed_sum = [&]( VD v ) -> uint32_t {
+      // v é um índice quando usamos vecS; convertemos para size_t
+      uint32_t s    = labels[static_cast<std::size_t>( v )];
+      auto [nb, ne] = boost::adjacent_vertices( v, g );
+      for ( auto it = nb; it != ne; ++it ) {
+        s += labels[static_cast<std::size_t>( *it )];
+      }
+      return s;
+    };
+
+    auto [vb, ve] = boost::vertices( g );
+    for ( auto it = vb; it != ve; ++it ) {
+      VD            v  = *it;
+      const uint8_t fv = labels[static_cast<std::size_t>( v )];
+      if ( fv == 0 || fv == 1 ) {
+        if ( closed_sum( v ) < 3 )
+          return false;
+      }
+    }
+    return true;
+  }
+
+  std::vector<std::size_t> violating_vertices_fdr3( const Graph                &g,
+                                                    const std::vector<uint8_t> &labels ) {
+    using VD = boost::graph_traits<Graph>::vertex_descriptor;
+
+    const auto n = boost::num_vertices( g );
+    if ( labels.size() != n )
+      throw std::invalid_argument( "labels.size() != num_vertices(graph)" );
+
+    std::vector<std::size_t> bad;
+
+    auto closed_sum = [&]( VD v ) -> uint32_t {
+      uint32_t s    = labels[static_cast<std::size_t>( v )];
+      auto [nb, ne] = boost::adjacent_vertices( v, g );
+      for ( auto it = nb; it != ne; ++it ) {
+        s += labels[static_cast<std::size_t>( *it )];
+      }
+      return s;
+    };
+
+    auto [vb, ve] = boost::vertices( g );
+    for ( auto it = vb; it != ve; ++it ) {
+      VD            v   = *it;
+      const auto    idx = static_cast<std::size_t>( v );
+      const uint8_t fv  = labels[idx];
+      if ( fv == 0 || fv == 1 ) {
+        if ( closed_sum( v ) < 3 )
+          bad.push_back( idx );
+      }
+    }
+    return bad;
+  }
 }  // namespace r3dp::core
