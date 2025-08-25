@@ -1,13 +1,8 @@
-#include "r3dp.h"
-#include <boost/lexical_cast.hpp>
-#include <string>
-#include <vector>
+#include <cstdlib>
+#include <iostream>
 
-int main() {
-  r3dp();
+int main(int argc, char **argv) {
+  std::cout << "Hello World!\n";
 
-  std::vector<std::string> vec;
-  vec.push_back("test_package");
-
-  r3dp_print_vector(vec);
+  return EXIT_SUCCESS;
 }

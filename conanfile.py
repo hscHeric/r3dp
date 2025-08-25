@@ -39,4 +39,5 @@ class r3dpRecipe(ConanFile):
         cmake.install()
 
     def requirements(self):
-        self.requires("boost/1.88.0")
+        self.requires("cli11/2.5.0")
+        self.requires("nlohmann_json/3.12.0")
