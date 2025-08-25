@@ -7,7 +7,7 @@ find_package(nlohmann_json REQUIRED)
 
 add_executable(r3dp src/r3dp.cpp src/main.cpp)
 
-target_link_libraries(r3dp boost::boost CLI11::CLI11
+target_link_libraries(r3dp Boost::boost CLI11::CLI11
                       nlohmann_json::nlohmann_json)
 
 install(
