@@ -125,4 +125,18 @@ namespace r3dp::core {
     }
     return bad;
   }
+
+  size_t max_degree( const Graph &g ) {
+    using boost::vertices;
+
+    size_t maxdeg = 0;
+
+    auto [vi, vi_end] = vertices( g );
+    for ( ; vi != vi_end; ++vi ) {
+      // Como não há laços, degree(*vi, g) é exatamente o nº de vizinhos de *vi.
+      maxdeg = std::max( maxdeg, degree( *vi, g ) );
+    }
+    return maxdeg;
+  }
+
 }  // namespace r3dp::core

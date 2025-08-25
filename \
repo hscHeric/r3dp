@@ -124,6 +124,7 @@ namespace r3dp::ga {
       population_next->set_fitness( e, elite_fit );
     }
 
+    // Generate new population through crossover and mutation
 #pragma omp parallel for num_threads( max_threads )
     for ( int i = elite_count; i < pop_size; ++i ) {
       unsigned int parent1_idx = tournament_selection();

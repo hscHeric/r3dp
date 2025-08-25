@@ -18,4 +18,12 @@ namespace r3dp::core {
   bool                     is_valid_fdr3( const Graph &g, const std::vector<uint8_t> &labels );
   std::vector<std::size_t> violating_vertices_fdr3( const Graph                &g,
                                                     const std::vector<uint8_t> &labels );
+
+  /**
+   * @brief Retorna o grau máximo Δ(G) do grafo (sem laços).
+   *
+   * Pré-condição: o grafo é simples (sem múltiplas arestas paralelas e sem laços).
+   * Complexidade: O(V), chamando degree(v,g) para cada vértice.
+   */
+  size_t max_degree( const Graph &g );
 }  // namespace r3dp::core

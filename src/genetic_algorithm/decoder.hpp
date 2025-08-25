@@ -16,7 +16,7 @@ namespace r3dp::ga {
     virtual ~Decoder() = default;
 
     /**
-     * @brief Decodifica um cromossomo e retorna a aptidão da solução.
+     * @brief Decodifica (corrige) um cromossomo e retorna a aptidão da solução.
      * @param chromosome O cromossomo a ser decodificado.
      * @return O valor da aptidão da solução.
      */

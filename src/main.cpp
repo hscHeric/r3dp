@@ -76,10 +76,12 @@ int main( int argc, char **argv ) {
     // ---------------- Grafo ----------------
     auto [totalVertices, edges] = r3dp::core::read_graph_from_file( file_edges );
     auto graph                  = r3dp::core::build_graph_from( totalVertices, edges );
+    auto delta_g                = r3dp::core::max_degree( graph );
 
     std::cout << "Resumo do Grafo:\n"
               << "  Vértices: " << boost::num_vertices( graph ) << "\n"
-              << "  Arestas:  " << boost::num_edges( graph ) << "\n\n";
+              << "  Arestas:  " << boost::num_edges( graph ) << "\n"
+              << " Grau máximo: " << delta_g << "\n";
 
     // ---------------- GA ----------------
     r3dp::core::DefaultRNG rng;
