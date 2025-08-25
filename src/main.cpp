@@ -15,12 +15,12 @@ int main( int argc, char **argv ) {
 
   CLI11_PARSE( r3dp_cli, argc, argv );
 
-  auto result = r3dp::read_graph_from_file( filename );
+  auto result = r3dp::core::read_graph_from_file( filename );
 
-  r3dp::Vertex         totalVertices = result.first;
-  std::set<r3dp::Edge> edges         = result.second;
+  r3dp::core::Vertex         totalVertices = result.first;
+  std::set<r3dp::core::Edge> edges         = result.second;
 
-  auto graph = r3dp::build_graph_from( totalVertices, edges );
+  auto graph = r3dp::core::build_graph_from( totalVertices, edges );
 
   std::cout << "=========================================\n";
   std::cout << "Resumo do Grafo\n";
@@ -36,7 +36,7 @@ int main( int argc, char **argv ) {
 
   std::cout << "-----------------------------------------\n";
   std::cout << "Grau de cada vértice:\n";
-  for ( r3dp::Vertex v = 0; v < boost::num_vertices( graph ); ++v ) {
+  for ( r3dp::core::Vertex v = 0; v < boost::num_vertices( graph ); ++v ) {
     std::cout << "  v" << v << " : grau = " << boost::degree( v, graph ) << "\n";
   }
 
