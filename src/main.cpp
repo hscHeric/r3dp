@@ -1,21 +1,45 @@
+#include "CLI/CLI.hpp"
 #include "r3dp.hpp"
 
+#include <boost/graph/graph_traits.hpp>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 int main( int argc, char **argv ) {
-  std::cout << "Hello World!\n";
-  std::string filename = "graph_data.txt";
-  auto        result   = r3dp::read_graph_from_file( filename );
+  CLI::App r3dp_cli( "Metaheurísticas para o problema {3} roman domination" );
+  argv = r3dp_cli.ensure_utf8( argv );
+
+  std::string filename = "Default";
+  r3dp_cli.add_option( "-f, --file", filename, "Path para o arquivo edges.txt" );
+
+  CLI11_PARSE( r3dp_cli, argc, argv );
+
+  auto result = r3dp::read_graph_from_file( filename );
 
   r3dp::Vertex         totalVertices = result.first;
   std::set<r3dp::Edge> edges         = result.second;
 
-  std::cout << "Total de vertices: " << totalVertices << std::endl;
-  std::cout << "Total de arestas unicas: " << edges.size() << std::endl;
-  std::cout << "Arestas remapeadas (u, v):" << std::endl;
+  auto graph = r3dp::build_graph_from( totalVertices, edges );
+
+  std::cout << "=========================================\n";
+  std::cout << "Resumo do Grafo\n";
+  std::cout << "-----------------------------------------\n";
+  std::cout << "Total de vertices:      " << boost::num_vertices( graph ) << "\n";
+  std::cout << "Total de arestas únicas:" << boost::num_edges( graph ) << "\n";
+  std::cout << "-----------------------------------------\n";
+
+  std::cout << "Arestas remapeadas (u, v):\n";
   for ( const auto &edge : edges ) {
-    std::cout << edge.first << " " << edge.second << std::endl;
+    std::cout << "  " << edge.first << " -- " << edge.second << "\n";
   }
+
+  std::cout << "-----------------------------------------\n";
+  std::cout << "Grau de cada vértice:\n";
+  for ( r3dp::Vertex v = 0; v < boost::num_vertices( graph ); ++v ) {
+    std::cout << "  v" << v << " : grau = " << boost::degree( v, graph ) << "\n";
+  }
+
+  std::cout << "=========================================\n";
   return EXIT_SUCCESS;
 }
