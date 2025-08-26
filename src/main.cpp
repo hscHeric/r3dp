@@ -8,11 +8,15 @@
 #include <chrono>
 #include <cstdlib>
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <string>
+#include <vector>
 
 using r3dp::core::is_valid_fdr3;
+using json = nlohmann::json;
 
 int main( int argc, char **argv ) {
   CLI::App app( "Metaheurísticas para o problema {3}-Roman Domination (r3dp)" );
@@ -66,7 +70,11 @@ int main( int argc, char **argv ) {
   app.add_option( "--log-every", log_every, "Logar a cada N gerações (0 = silencioso)" );
 
   std::string out_path;
-  app.add_option( "-o,--out", out_path, "Arquivo para salvar melhor cromossomo" );
+  app.add_option( "-o,--out", out_path, "Arquivo para salvar melhor cromossomo (texto)" );
+
+  // Novo: caminho do JSON (opcional). Se vazio, cai em <nome_do_grafo>_result.json
+  std::string json_path;
+  app.add_option( "--json", json_path, "Arquivo JSON para salvar os resultados" );
 
   // Parse
   argv = app.ensure_utf8( argv );
@@ -78,10 +86,14 @@ int main( int argc, char **argv ) {
     auto graph                  = r3dp::core::build_graph_from( totalVertices, edges );
     auto delta_g                = r3dp::core::max_degree( graph );
 
+    // Derivar nome do grafo a partir do path do arquivo (sem extensão)
+    namespace fs           = std::filesystem;
+    std::string graph_name = fs::path( file_edges ).stem().string();
+
     std::cout << "Resumo do Grafo:\n"
               << "  Vértices: " << boost::num_vertices( graph ) << "\n"
               << "  Arestas:  " << boost::num_edges( graph ) << "\n"
-              << " Grau máximo: " << delta_g << "\n";
+              << "  Grau máximo: " << delta_g << "\n";
 
     // ---------------- GA ----------------
     r3dp::core::DefaultRNG rng;
@@ -99,11 +111,12 @@ int main( int argc, char **argv ) {
                                                                                 rng,
                                                                                 decoder );
 
-    // ---------------- Loop de evolução ----------------
-    auto         start = std::chrono::steady_clock::now();
-    double       best  = ga_engine.best_fitness();
-    unsigned int stale = 0;
-    unsigned int g     = 0;
+    auto start = std::chrono::steady_clock::now();
+
+    double              best  = ga_engine.best_fitness();
+    unsigned int        stale = 0;
+    unsigned int        g     = 0;
+    std::vector<double> fitness_improvements;
 
     while ( true ) {
       ++g;
@@ -114,6 +127,8 @@ int main( int argc, char **argv ) {
       if ( improved ) {
         best  = current;
         stale = 0;
+
+        fitness_improvements.push_back( current );
       } else {
         stale++;
       }
@@ -141,12 +156,14 @@ int main( int argc, char **argv ) {
         break;
     }
 
-    // ---------------- Resultado final ----------------
+    auto      end = std::chrono::steady_clock::now();
+    long long elapsed_us =
+      std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
+
     const auto &best_chromosome = ga_engine.get_best_chromosome();
     std::cout << "\nResultado final após " << g << " gerações:\n";
     std::cout << "Melhor aptidão (custo): " << ga_engine.best_fitness() << "\n";
 
-    // Validação da solução final
     if ( is_valid_fdr3( graph, best_chromosome ) ) {
       std::cout << "A solução encontrada é VÁLIDA.\n";
     } else {
@@ -171,8 +188,38 @@ int main( int argc, char **argv ) {
         ofs << int( best_chromosome[i] );
       }
       ofs << "\n";
-      std::cout << "Salvo em: " << out_path << "\n";
+      std::cout << "Cromossomo salvo em: " << out_path << "\n";
     }
+
+    if ( json_path.empty() ) {
+      json_path = graph_name + "_result.json";
+    }
+
+    json j;
+    j["graph"]         = graph_name;
+    j["vertices"]      = static_cast<unsigned int>( boost::num_vertices( graph ) );
+    j["edges"]         = static_cast<unsigned int>( boost::num_edges( graph ) );
+    j["elapsed_us"]    = elapsed_us;
+    j["final_fitness"] = ga_engine.best_fitness();
+
+    j["labels"] = json::array();
+    for ( auto gene : best_chromosome ) {
+      j["labels"].push_back( static_cast<int>( gene ) );
+    }
+
+    // vetor com o fitness em cada melhora
+    j["fitness_improvements"] = fitness_improvements;
+
+    // grava arquivo
+    {
+      std::ofstream jofs( json_path );
+      if ( !jofs ) {
+        throw std::runtime_error( "Não foi possível abrir o arquivo JSON para escrita: " +
+                                  json_path );
+      }
+      jofs << std::setw( 2 ) << j << "\n";
+    }
+    std::cout << "JSON salvo em: " << json_path << "\n";
 
   } catch ( const std::exception &e ) {
     std::cerr << "Erro: " << e.what() << "\n";
