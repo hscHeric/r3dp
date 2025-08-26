@@ -1,22 +1,22 @@
 #pragma once
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_selectors.hpp>
+#define R3DP_USE_GA
 
-#define R3DP_VERSION_MINOR  0
-#define R3DP_VERSION_MAJOR  0
-#define R3DP_VERSION_PATCH  1
-#define R3DP_VERSION_STRING "0.0.1"
+#include "core/graph.hpp"
+#include "core/rng.hpp"
 
-#ifndef R3DP_CORE
-  #define R3DP_CORE
-  #include "core/graph.hpp"
-  #include "core/rng.hpp"
-#endif  // !CORE
-
-#ifndef R3DP_GA
-  #define R3DP_GA
+#ifdef R3DP_USE_GA
   #include "genetic_algorithm/genetic_algorithm.hpp"
-  #include "genetic_algorithm/population.hpp"
+  #include "genetic_algorithm/pop_generator.hpp"
   #include "genetic_algorithm/r3d_decoder.hpp"
 #endif
+
+namespace r3dp {
+  namespace version {
+    constexpr unsigned int       major  = 0;
+    constexpr unsigned int       minor  = 1;
+    constexpr unsigned int       patch  = 0;
+    constexpr const char * const string = "0.1.0";
+  }  // namespace version
+
+}  // namespace r3dp
