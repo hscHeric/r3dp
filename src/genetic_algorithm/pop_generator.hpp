@@ -1,24 +1,24 @@
 #pragma once
 
+#include "../core/graph.hpp"
 #include "../core/rng.hpp"
-#include "population.hpp"
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <vector>
 
 namespace r3dp::ga {
 
-  std::vector<Chromosome> create_random_population( unsigned int population_size,
-                                                    unsigned int chromosome_size,
-                                                    core::RNG   &rng ) {
-    std::vector<Chromosome> population;
-    for ( unsigned int i = 0; i < population_size; ++i ) {
-      Chromosome chromosome( chromosome_size );
-      for ( unsigned int j = 0; j < chromosome_size; ++j ) {
-        chromosome[j] = rng.randInt( 3 );
-      }
-      population.push_back( chromosome );
-    }
-    return population;
-  }
+  using Heuristic =
+    std::function<std::vector<uint8_t>( const r3dp::core::Graph &, r3dp::core::RNG & )>;
+
+  std::vector<std::vector<uint8_t>>
+    generate_population( const r3dp::core::Graph      &graph,
+                         size_t                        population_size,
+                         const std::vector<Heuristic> &heuristic_funcs,
+                         r3dp::core::RNG              &rng );
+
+  std::vector<uint8_t> h1( const r3dp::core::Graph &graph, r3dp::core::RNG &rng );
 
 }  // namespace r3dp::ga
