@@ -4,8 +4,9 @@
 #include <vector>
 
 namespace r3dp::ga {
-  static constexpr uint8_t UNLABELED_VERTEX =
-    255;  // AQUI DEFINI SOMENTE COMO ESCOPO DE ARQUIVO (pensar em um jeito melhor depois )
+  // Lembrar de perguntar o atilio se o funcionamento da H1, só funciona se considerar que 0 é
+  // unlabed
+  static constexpr uint8_t UNLABELED_VERTEX = 0;
 
   std::vector<std::vector<uint8_t>>
     generate_population( const r3dp::core::Graph      &graph,
