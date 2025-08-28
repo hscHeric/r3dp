@@ -96,11 +96,11 @@ int main( int argc, char **argv ) {
               << "  Grau máximo: " << delta_g << "\n";
 
     // ---------------- GA ----------------
-    r3dp::core::DefaultRNG rng;
-    r3dp::ga::R3DDecoder   decoder( graph );
+    r3dp::core::DefaultRNG           rng( 1234 );
+    r3dp::ga::R3DDecoder             decoder( graph );
+    std::vector<r3dp::ga::Heuristic> heuristics{ r3dp::ga::h1, r3dp::ga::h2 };
 
-    auto init_pop =
-      r3dp::ga::create_random_population( population_size, boost::num_vertices( graph ), rng );
+    auto init_pop = r3dp::ga::generate_population( graph, population_size, heuristics, rng );
 
     r3dp::ga::GAEngine<r3dp::core::DefaultRNG, r3dp::ga::R3DDecoder> ga_engine( init_pop,
                                                                                 mutation_rate,

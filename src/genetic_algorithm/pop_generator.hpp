@@ -20,5 +20,6 @@ namespace r3dp::ga {
                          r3dp::core::RNG              &rng );
 
   std::vector<uint8_t> h1( const r3dp::core::Graph &graph, r3dp::core::RNG &rng );
+  std::vector<uint8_t> h2( const r3dp::core::Graph &graph, r3dp::core::RNG &rng );
 
 }  // namespace r3dp::ga
