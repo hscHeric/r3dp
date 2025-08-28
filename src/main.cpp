@@ -1,5 +1,6 @@
 #include "CLI/CLI.hpp"
 #include "core/graph.hpp"
+#include "core/rng.hpp"
 #include "genetic_algorithm/genetic_algorithm.hpp"
 #include "genetic_algorithm/pop_generator.hpp"
 #include "genetic_algorithm/r3d_decoder.hpp"
@@ -98,7 +99,9 @@ int main( int argc, char **argv ) {
     // ---------------- GA ----------------
     r3dp::core::DefaultRNG           rng( 1234 );
     r3dp::ga::R3DDecoder             decoder( graph );
-    std::vector<r3dp::ga::Heuristic> heuristics{ r3dp::ga::h1, r3dp::ga::h2 };
+    std::vector<r3dp::ga::Heuristic> heuristics{
+      r3dp::ga::h1, r3dp::ga::h2, r3dp::ga::h3, r3dp::ga::h4
+    };
 
     auto init_pop = r3dp::ga::generate_population( graph, population_size, heuristics, rng );
 

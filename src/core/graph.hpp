@@ -23,7 +23,6 @@ namespace r3dp::core {
    * @brief Retorna o grau máximo Δ(G) do grafo (sem laços).
    *
    * Pré-condição: o grafo é simples (sem múltiplas arestas paralelas e sem laços).
-   * Complexidade: O(V), chamando degree(v,g) para cada vértice.
    */
   size_t max_degree( const Graph &g );
 }  // namespace r3dp::core

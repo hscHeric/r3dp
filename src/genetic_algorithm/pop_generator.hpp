@@ -21,5 +21,9 @@ namespace r3dp::ga {
 
   std::vector<uint8_t> h1( const r3dp::core::Graph &graph, r3dp::core::RNG &rng );
   std::vector<uint8_t> h2( const r3dp::core::Graph &graph, r3dp::core::RNG &rng );
+  std::vector<uint8_t> h3( const r3dp::core::Graph &graph, r3dp::core::RNG &rng );
+
+  // A heuristica h4 não dá garantias de retornar uma FD{3}R válida
+  std::vector<uint8_t> h4( const r3dp::core::Graph &graph, r3dp::core::RNG &rng );
 
 }  // namespace r3dp::ga
