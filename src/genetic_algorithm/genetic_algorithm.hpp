@@ -104,7 +104,6 @@ namespace r3dp::ga {
   std::pair<Chromosome, double> GAEngine<RNG, Decoder>::evolve() {
     const unsigned int pop_size = population_current->size();
 
-    // Preserve elitism
     unsigned int elite_count = 0;
     if ( elite_rate > 0.0 ) {
       const double raw = elite_rate * static_cast<double>( pop_size );

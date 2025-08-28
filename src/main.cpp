@@ -97,7 +97,7 @@ int main( int argc, char **argv ) {
               << "  Grau máximo: " << delta_g << "\n";
 
     // ---------------- GA ----------------
-    r3dp::core::DefaultRNG           rng( 1234 );
+    r3dp::core::DefaultRNG           rng;
     r3dp::ga::R3DDecoder             decoder( graph );
     std::vector<r3dp::ga::Heuristic> heuristics{
       r3dp::ga::h1, r3dp::ga::h2, r3dp::ga::h3, r3dp::ga::h4
