@@ -22,11 +22,11 @@ namespace r3dp::ga {
               RNG                           &rng,
               Decoder                       &decoder );
 
-    std::pair<Chromosome, double> evolve();
+    std::pair<Chromosome, Fitness> evolve();
 
     const Chromosome &get_best_chromosome() const;
 
-    double best_fitness() const;
+    Fitness best_fitness() const;
 
     const Population &population() const;
 
@@ -101,7 +101,7 @@ namespace r3dp::ga {
   }
 
   template <typename RNG, typename Decoder>
-  std::pair<Chromosome, double> GAEngine<RNG, Decoder>::evolve() {
+  std::pair<Chromosome, Fitness> GAEngine<RNG, Decoder>::evolve() {
     const unsigned int pop_size = population_current->size();
 
     unsigned int elite_count = 0;
@@ -163,7 +163,7 @@ namespace r3dp::ga {
   }
 
   template <typename RNG, typename Decoder>
-  double GAEngine<RNG, Decoder>::best_fitness() const {
+  Fitness GAEngine<RNG, Decoder>::best_fitness() const {
     return population_current->get_best_fitness();
   }
 

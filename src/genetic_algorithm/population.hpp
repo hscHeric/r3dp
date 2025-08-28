@@ -26,12 +26,12 @@ namespace r3dp::ga {
     unsigned chromosome_size() const;  // Tamanho do cromossomo
     unsigned size() const;             // Tamanho da população
 
-    double                      get_best_fitness() const;
-    double                      get_fitness( unsigned i ) const;
+    Fitness                     get_best_fitness() const;
+    Fitness                     get_fitness( unsigned i ) const;
     const std::vector<uint8_t> &get_chromosome( unsigned i ) const;
 
     // Métodos para acesso direto (privado ou friend de GeneticAlgorithm)
-    void                  set_fitness( unsigned i, double f );
+    void                  set_fitness( unsigned i, Fitness f );
     void                  sort_fitness();
     std::vector<uint8_t> &get_chromosome_at( unsigned i );
 

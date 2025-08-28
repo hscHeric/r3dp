@@ -26,11 +26,11 @@ namespace r3dp::ga {
     return population.size();
   }
 
-  double Population::get_best_fitness() const {
+  Fitness Population::get_best_fitness() const {
     return get_fitness( 0 );
   }
 
-  double Population::get_fitness( unsigned i ) const {
+  Fitness Population::get_fitness( unsigned i ) const {
     if ( i >= size() ) {
       throw std::range_error( "[get_fitness] individuo fora dos limites" );
     }
@@ -51,7 +51,7 @@ namespace r3dp::ga {
     return population[i];
   }
 
-  void Population::set_fitness( unsigned i, double f ) {
+  void Population::set_fitness( unsigned i, Fitness f ) {
     fitness[i].first  = f;
     fitness[i].second = i;
   }
