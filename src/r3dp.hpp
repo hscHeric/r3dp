@@ -1,15 +1,15 @@
 #pragma once
 
 #define R3DP_USE_GA
-
-#include "core/graph.hpp"
-#include "core/rng.hpp"
-
-#ifdef R3DP_USE_GA
-  #include "genetic_algorithm/genetic_algorithm.hpp"
-  #include "genetic_algorithm/pop_generator.hpp"
-  #include "genetic_algorithm/r3d_decoder.hpp"
+#define DEBUG
+#ifdef DEBUG
+  #include <iostream>
+  #define DEBUG_PRINT( msg ) std::cout << msg << std::endl;
+#else
+  #define DEBUG_PRINT( msg )  // Nada é impresso se DEBUG não estiver definido
 #endif
+
+#include <nlohmann/json.hpp>
 
 namespace r3dp {
   namespace version {
@@ -19,4 +19,5 @@ namespace r3dp {
     constexpr const char * const string = "0.1.0";
   }  // namespace version
 
+  nlohmann::json parse_and_run_ga( int argc, char **argv );
 }  // namespace r3dp
