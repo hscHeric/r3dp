@@ -6,7 +6,7 @@
 namespace r3dp::ga {
   // Lembrar de perguntar o atilio se o funcionamento da H1, só funciona se considerar que 0 é
   // unlabed
-  static constexpr uint8_t UNLABELED_VERTEX = 0;
+  static constexpr uint8_t UNLABELED_VERTEX = 255;
 
   std::vector<std::vector<uint8_t>>
     generate_population( const r3dp::core::Graph      &graph,
@@ -30,11 +30,20 @@ namespace r3dp::ga {
   }
 
   std::vector<uint8_t> h1( const r3dp::core::Graph &graph, r3dp::core::RNG &rng ) {
-    std::set<core::Vertex> unvisited;
-    std::vector<uint8_t>   labels( boost::num_vertices( graph ), UNLABELED_VERTEX );
-    auto [vb, ve] = boost::vertices( graph );
+    std::vector<uint8_t>      labels( boost::num_vertices( graph ), UNLABELED_VERTEX );
+    std::vector<core::Vertex> unvisited;
+
+    auto [vb, ve] = boost::vertices( graph );  // Iterador para os vértices
     for ( auto it = vb; it != ve; ++it ) {
-      unvisited.insert( *it );
+      unvisited.push_back( *it );
+    }
+
+    auto *default_rng = dynamic_cast<r3dp::core::DefaultRNG *>( &rng );
+    if ( default_rng ) {
+      default_rng->shuffle( unvisited.begin(), unvisited.end() );
+    } else {
+      throw std::runtime_error(
+        "O objeto RNG fornecido não é um DefaultRNG e a reprodutibilidade não pode ser garantida." );
     }
 
     auto all_neighbors_labeled = [&]( core::Vertex x ) -> bool {
@@ -46,33 +55,36 @@ namespace r3dp::ga {
       return true;
     };
 
-    while ( !unvisited.empty() ) {
-      unsigned int random_index = rng.randInt( unvisited.size() - 1 );
-      auto         it           = std::next( unvisited.begin(), random_index );
-      core::Vertex v            = *it;
+    for ( auto v : unvisited ) {
+      if ( labels[v] != UNLABELED_VERTEX ) {
+        continue;  // quanto estava usando o set os valores eram removidos apos rotular
+        // agora tenho que fazer isso para carantir a o terceiro caso
+      }
 
       if ( boost::degree( v, graph ) == 0 ) {
         labels[v] = 2;
-        unvisited.erase( v );
       } else if ( all_neighbors_labeled( v ) ) {
         labels[v] = 1;
-        unvisited.erase( v );
       } else {
         labels[v] = 0;
 
         auto [nb, ne] = boost::adjacent_vertices( v, graph );
-        auto first    = *nb;
-        labels[first] = 3;
+        if ( nb != ne ) {
+          // Aqui tive que normalizar (explicar para o atilio)
+          // se não fizer esse sort os resultados não são reproduziveis a partir da seed
+          std::vector<core::Vertex> neighbors_vec;
+          for ( auto it = nb; it != ne; ++it ) {
+            neighbors_vec.push_back( *it );
+          }
+          std::sort( neighbors_vec.begin(), neighbors_vec.end() );
 
-        ++nb;
-
-        for ( auto nit = nb; nit != ne; ++nit ) {
-          auto n    = *nit;
-          labels[n] = 2;
-          unvisited.erase( n );
+          auto first    = neighbors_vec[0];
+          labels[first] = 3;
+          for ( size_t i = 1; i < neighbors_vec.size(); ++i ) {
+            auto n    = neighbors_vec[i];
+            labels[n] = 2;
+          }
         }
-
-        unvisited.erase( v );
       }
     }
 
@@ -80,11 +92,20 @@ namespace r3dp::ga {
   }
 
   std::vector<uint8_t> h2( const r3dp::core::Graph &graph, r3dp::core::RNG &rng ) {
-    std::set<core::Vertex> unvisited;
-    std::vector<uint8_t>   labels( boost::num_vertices( graph ), UNLABELED_VERTEX );
-    auto [vb, ve] = boost::vertices( graph );
+    std::vector<uint8_t>      labels( boost::num_vertices( graph ), UNLABELED_VERTEX );
+    std::vector<core::Vertex> unvisited;
+
+    auto [vb, ve] = boost::vertices( graph );  // Iterador para os vértices
     for ( auto it = vb; it != ve; ++it ) {
-      unvisited.insert( *it );
+      unvisited.push_back( *it );
+    }
+
+    auto *default_rng = dynamic_cast<r3dp::core::DefaultRNG *>( &rng );
+    if ( default_rng ) {
+      default_rng->shuffle( unvisited.begin(), unvisited.end() );
+    } else {
+      throw std::runtime_error(
+        "O objeto RNG fornecido não é um DefaultRNG e a reprodutibilidade não pode ser garantida." );
     }
 
     auto all_neighbors_labeled = [&]( core::Vertex x ) -> bool {
@@ -96,27 +117,32 @@ namespace r3dp::ga {
       return true;
     };
 
-    while ( !unvisited.empty() ) {
-      unsigned int random_index = rng.randInt( unvisited.size() - 1 );
-      auto         it           = std::next( unvisited.begin(), random_index );
-      core::Vertex v            = *it;
+    for ( auto v : unvisited ) {
+      if ( labels[v] != UNLABELED_VERTEX ) {
+        continue;  // quanto estava usando o set os valores eram removidos apos rotular
+        // agora tenho que fazer isso para carantir a o terceiro caso
+      }
 
       if ( all_neighbors_labeled( v ) ) {
         labels[v] = 2;
-        unvisited.erase( v );
       } else {
-        labels[v] = 3;
+        labels[v] = 2;
 
-        // percorre todos os vizinhos de v
         auto [nb, ne] = boost::adjacent_vertices( v, graph );
-        for ( auto nit = nb; nit != ne; ++nit ) {
-          core::Vertex n = *nit;
-          if ( labels[n] == UNLABELED_VERTEX ) {
+        if ( nb != ne ) {
+          // Aqui tive que normalizar (explicar para o atilio)
+          // se não fizer esse sort os resultados não são reproduziveis a partir da seed
+          std::vector<core::Vertex> neighbors_vec;
+          for ( auto it = nb; it != ne; ++it ) {
+            neighbors_vec.push_back( *it );
+          }
+          std::sort( neighbors_vec.begin(), neighbors_vec.end() );
+
+          for ( size_t i = 0; i < neighbors_vec.size(); ++i ) {
+            auto n    = neighbors_vec[i];
             labels[n] = 0;
-            unvisited.erase( n );
           }
         }
-        unvisited.erase( v );
       }
     }
 
