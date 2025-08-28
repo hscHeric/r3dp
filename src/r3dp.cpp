@@ -1,3 +1,5 @@
+#include "r3dp.hpp"
+
 #include "CLI/CLI.hpp"
 #include "core/graph.hpp"
 #include "core/rng.hpp"
@@ -5,6 +7,7 @@
 #include "genetic_algorithm/pop_generator.hpp"
 #include "genetic_algorithm/r3d_decoder.hpp"
 
+#include <chrono>
 #include <cstdint>
 #include <fstream>
 #include <limits>
@@ -20,13 +23,6 @@ namespace r3dp {
     std::string file_path = "default.txt";
     app.add_option( "-f,--file", file_path, "Arquivo de arestas (edges.txt)" )->required();
 
-    unsigned int time_limit = 0;
-    app.add_option( "--time-limit", time_limit, "Tempo máximo em segundos" )->required();
-
-    std::string output_path = "default.json";  // Valor padrão para o arquivo de saída
-    app.add_option( "-o,--output", output_path, "Arquivo de resultados (results.json)" )
-      ->required();
-
     unsigned int population_size = 200;
     app.add_option( "-p,--pop-size", population_size, "Tamanho da população (>= 2)" )
       ->check( CLI::Range( 2u, UINT_MAX ) );
@@ -34,15 +30,15 @@ namespace r3dp {
     unsigned int tournament_size = 2;
     app
       .add_option(
-        "-t,--tournament", population_size, "Tamanho do torneio (Operador de Seleção) (>= 2)" )
+        "-t,--tournament", tournament_size, "Tamanho do torneio (Operador de Seleção) (>= 2)" )
       ->check( CLI::Range( 2u, UINT_MAX ) );
-
-    double crossover_rate = 0.8;
-    app.add_option( "-c,--crossover", crossover_rate, "Taxa de crossover em [0,1]" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
 
     double mutation_rate = 0.01;
     app.add_option( "-m,--mutation", mutation_rate, "Taxa de mutação em [0,1]" )
+      ->check( CLI::Range( 0.0, 1.0 ) );
+
+    double crossover_rate = 0.8;
+    app.add_option( "-c,--crossover", crossover_rate, "Taxa de crossover em [0,1]" )
       ->check( CLI::Range( 0.0, 1.0 ) );
 
     double elite_rate = 0.10;
@@ -52,6 +48,13 @@ namespace r3dp {
     unsigned int max_threads = 1;
     app.add_option( "-j,--threads", max_threads, "Número de threads (>= 1)" )
       ->check( CLI::Range( 1u, UINT_MAX ) );
+
+    unsigned int time_limit = 0;
+    app.add_option( "--time-limit", time_limit, "Tempo máximo em segundos" )->required();
+
+    std::string output_path = "default.json";
+    app.add_option( "-o,--output", output_path, "Arquivo de resultados (results.json)" )
+      ->required();
 
     unsigned int trials = 1;
     app.add_option( "-r,--runs", trials, "Número de tentativas" )
@@ -67,12 +70,16 @@ namespace r3dp {
     core::DefaultRNG rng;
     ga::R3DDecoder   decoder( graph );
 
-    uint64_t                                 best_fitness = std::numeric_limits<uint64_t>::max();
+    uint64_t best_fitness_global = std::numeric_limits<uint64_t>::max();
     std::vector<std::pair<uint64_t, double>> best_improvements;
-    std::vector<ga::Heuristic>               heuristics = { ga::h1, ga::h2, ga::h3, ga::h4 };
+
+    auto total_start_time = std::chrono::steady_clock::now();
+
     for ( size_t trial = 0; trial < trials; ++trial ) {
-      auto init_pop = ga::generate_population( graph, population_size, heuristics, rng );
-      ga::GAEngine<core::DefaultRNG, ga::R3DDecoder> ga_engine( init_pop,
+      // Criando o GAEngine para cada tentativa
+      auto initial_population =
+        ga::generate_population( graph, population_size, { ga::h1, ga::h2, ga::h3, ga::h4 }, rng );
+      ga::GAEngine<core::DefaultRNG, ga::R3DDecoder> ga_engine( initial_population,
                                                                 mutation_rate,
                                                                 crossover_rate,
                                                                 elite_rate,
@@ -81,51 +88,49 @@ namespace r3dp {
                                                                 rng,
                                                                 decoder );
 
-      uint64_t local_best_fitness = std::numeric_limits<uint64_t>::max();
-      auto     start_time         = std::chrono::steady_clock::now();
+      uint64_t current_best_fitness_in_trial = std::numeric_limits<uint64_t>::max();
 
+      // Loop de evolução baseado no tempo
       while ( true ) {
         auto [current_best_chromosome, current_fitness] = ga_engine.evolve();
 
-        if ( current_fitness < local_best_fitness ) {
-          local_best_fitness = current_fitness;
-          best_improvements.push_back(
-            { local_best_fitness,
-              std::chrono::duration<double>( std::chrono::steady_clock::now() - start_time )
-                .count() } );
+        if ( current_fitness < current_best_fitness_in_trial ) {
+          current_best_fitness_in_trial = current_fitness;
         }
 
-        auto                          current_time    = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_seconds = current_time - start_time;
+        if ( current_best_fitness_in_trial < best_fitness_global ) {
+          best_fitness_global                              = current_best_fitness_in_trial;
+          auto                          current_total_time = std::chrono::steady_clock::now();
+          std::chrono::duration<double> elapsed_total_seconds =
+            current_total_time - total_start_time;
+          best_improvements.push_back( { best_fitness_global, elapsed_total_seconds.count() } );
+        }
 
-        if ( elapsed_seconds.count() >= time_limit ) {
+        auto                          current_total_time    = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_total_seconds = current_total_time - total_start_time;
+
+        if ( elapsed_total_seconds.count() >= time_limit ) {
           break;
         }
       }
-
-      if ( local_best_fitness < best_fitness ) {
-        best_fitness = local_best_fitness;
-      }
     }
 
-    // Criando o JSON com os resultados
     nlohmann::json result;
     result["graph_name"]        = graph_name;
     result["num_vertices"]      = totalVertices;
     result["num_edges"]         = edges.size();
-    result["best_fitness"]      = best_fitness;
+    result["best_fitness"]      = best_fitness_global;
     result["best_improvements"] = best_improvements;
     result["num_trials"]        = trials;
 
     std::ofstream ofs( output_path );
     if ( ofs ) {
-      ofs << result.dump( 4 );  // Escreve o JSON com indentação de 4 espaços
-      std::cout << "Resultado salvo em: " << output_path << std::endl;
+      ofs << result.dump( 4 );
+      LOG_MESSAGE( "Resultado salvo em: " << output_path );
     } else {
-      std::cerr << "Erro ao salvar o arquivo JSON." << std::endl;
+      LOG_ERR( "Erro ao salvar arquivo JSON" )
     }
 
     return 0;
   }
-
 }  // namespace r3dp

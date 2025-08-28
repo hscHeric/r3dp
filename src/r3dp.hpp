@@ -13,7 +13,6 @@
   #include "genetic_algorithm/pop_generator.hpp"
   #include "genetic_algorithm/r3d_decoder.hpp"
 #endif
-
 #ifdef DEBUG
   #define LOG_MESSAGE( msg ) \
     std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << msg << std::endl;
@@ -28,6 +27,10 @@
       std::cout << elem << " ";                                                        \
     }                                                                                  \
     std::cout << "]" << std::endl;
+
+  #define LOG_ERR( msg ) \
+    std::cerr << "[ERRO] " << __FILE__ << ":" << __LINE__ << " - " << msg << std::endl;
+
 #else
   #define LOG_MESSAGE( msg ) \
     do {                     \
@@ -38,7 +41,11 @@
   #define LOG_VECTOR( vec ) \
     do {                    \
     } while ( 0 )
+  #define LOG_ERR( msg ) \
+    do {                 \
+    } while ( 0 )
 #endif
+
 namespace r3dp {
   namespace version {
     constexpr unsigned int       major  = 0;
