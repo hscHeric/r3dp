@@ -1,16 +1,44 @@
 #pragma once
 
-#define R3DP_USE_GA
 #define DEBUG
-#ifdef DEBUG
-  #include <iostream>
-  #define DEBUG_PRINT( msg ) std::cout << msg << std::endl;
-#else
-  #define DEBUG_PRINT( msg )  // Nada é impresso se DEBUG não estiver definido
-#endif
+#define R3DP_USE_GA
+
+#include "core/graph.hpp"
+#include "core/rng.hpp"
 
 #include <nlohmann/json.hpp>
 
+#ifdef R3DP_USE_GA
+  #include "genetic_algorithm/genetic_algorithm.hpp"
+  #include "genetic_algorithm/pop_generator.hpp"
+  #include "genetic_algorithm/r3d_decoder.hpp"
+#endif
+
+#ifdef DEBUG
+  #define LOG_MESSAGE( msg ) \
+    std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << msg << std::endl;
+
+  #define LOG_VAR( var )                                                                        \
+    std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << #var << " = " << ( var ) \
+              << std::endl;
+
+  #define LOG_VECTOR( vec )                                                            \
+    std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << #vec << " = ["; \
+    for ( const auto &elem : vec ) {                                                   \
+      std::cout << elem << " ";                                                        \
+    }                                                                                  \
+    std::cout << "]" << std::endl;
+#else
+  #define LOG_MESSAGE( msg ) \
+    do {                     \
+    } while ( 0 )
+  #define LOG_VAR( var ) \
+    do {                 \
+    } while ( 0 )
+  #define LOG_VECTOR( vec ) \
+    do {                    \
+    } while ( 0 )
+#endif
 namespace r3dp {
   namespace version {
     constexpr unsigned int       major  = 0;
@@ -19,5 +47,5 @@ namespace r3dp {
     constexpr const char * const string = "0.1.0";
   }  // namespace version
 
-  nlohmann::json parse_and_run_ga( int argc, char **argv );
+  int run_ga( int argc, char *argv[] );
 }  // namespace r3dp

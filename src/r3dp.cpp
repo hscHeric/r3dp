@@ -1,5 +1,3 @@
-#include "r3dp.hpp"
-
 #include "CLI/CLI.hpp"
 #include "core/graph.hpp"
 #include "core/rng.hpp"
@@ -7,107 +5,127 @@
 #include "genetic_algorithm/pop_generator.hpp"
 #include "genetic_algorithm/r3d_decoder.hpp"
 
-#include <climits>
 #include <cstdint>
-
-using json = nlohmann::json;
+#include <fstream>
+#include <limits>
+#include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
 
 namespace r3dp {
 
-  static double calculate_density( unsigned int vertices, unsigned int edges ) {
-    if ( vertices <= 1 )
-      return 0.0;  // Densidade é zero para grafos sem ou com um único vértice
-    double max_edges = ( vertices * ( vertices - 1 ) ) / 2.0;
-    return edges / max_edges;
-  }
+  int run_ga( int argc, char *argv[] ) {
+    CLI::App app{ "Algoritmo genético para o problema da dominação {3}-romana " };
 
-  nlohmann::json parse_and_run_ga( int argc, char **argv ) {
-    CLI::App app( "Algoritmo Genético para o problema {3}-Roman Domination (r3dp)" );
+    std::string file_path = "default.txt";
+    app.add_option( "-f,--file", file_path, "Arquivo de arestas (edges.txt)" )->required();
 
-    std::string file_edges;
-    app.add_option( "-f,--file", file_edges, "Arquivo de arestas (edges.txt)" )
-      ->required();  // O arquivo de arestas é obrigatório para a execução
+    unsigned int time_limit = 0;
+    app.add_option( "--time-limit", time_limit, "Tempo máximo em segundos" )->required();
+
+    std::string output_path = "default.json";  // Valor padrão para o arquivo de saída
+    app.add_option( "-o,--output", output_path, "Arquivo de resultados (results.json)" )
+      ->required();
 
     unsigned int population_size = 200;
     app.add_option( "-p,--pop-size", population_size, "Tamanho da população (>= 2)" )
       ->check( CLI::Range( 2u, UINT_MAX ) );
 
-    double mutation_rate = 0.03;
-    app.add_option( "-m,--mutation", mutation_rate, "Taxa de mutação em [0,1]" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    unsigned int tournament_size = 2;
+    app
+      .add_option(
+        "-t,--tournament", population_size, "Tamanho do torneio (Operador de Seleção) (>= 2)" )
+      ->check( CLI::Range( 2u, UINT_MAX ) );
 
-    double crossover_rate = 0.9;
+    double crossover_rate = 0.8;
     app.add_option( "-c,--crossover", crossover_rate, "Taxa de crossover em [0,1]" )
       ->check( CLI::Range( 0.0, 1.0 ) );
 
-    double elite_rate = 0.1;
+    double mutation_rate = 0.01;
+    app.add_option( "-m,--mutation", mutation_rate, "Taxa de mutação em [0,1]" )
+      ->check( CLI::Range( 0.0, 1.0 ) );
+
+    double elite_rate = 0.10;
     app.add_option( "-e,--elite", elite_rate, "Fração de elite em [0,1]" )
       ->check( CLI::Range( 0.0, 1.0 ) );
 
-    unsigned int tournament_size = 5;
-    app.add_option( "-t,--tournament", tournament_size, "Tamanho do torneio (>= 1)" )
-      ->check( CLI::Range( 1u, UINT_MAX ) );
-
-    unsigned int max_threads = 8;
+    unsigned int max_threads = 1;
     app.add_option( "-j,--threads", max_threads, "Número de threads (>= 1)" )
       ->check( CLI::Range( 1u, UINT_MAX ) );
 
-    unsigned int time_limit = 0;
-    app.add_option( "--time-limit", time_limit, "Tempo máximo em segundos (0 = desabilita)" )
-      ->required();  // O tempo limite é obrigatório para a execução.
-
-    std::string out_path;
-    app.add_option( "-o,--out", out_path, "Arquivo para salvar melhor cromossomo (texto)" );
-
-    // Parâmetro para o número de tentativas.
     unsigned int trials = 1;
-    app.add_option( "--trials", trials, "Número de tentativas (>= 1)" )
+    app.add_option( "-r,--runs", trials, "Número de tentativas" )
       ->check( CLI::Range( 1u, UINT_MAX ) );
 
     argv = app.ensure_utf8( argv );
     CLI11_PARSE( app, argc, argv );
 
-    try {
-      auto [totalVertices, edges] = core::read_graph_from_file( file_edges );
-      auto graph                  = core::build_graph_from( totalVertices, edges );
-      auto delta_g                = core::max_degree( graph );
+    auto [totalVertices, edges] = core::read_graph_from_file( file_path );
+    auto        graph           = core::build_graph_from( totalVertices, edges );
+    std::string graph_name      = std::filesystem::path( file_path ).stem().string();
 
-      namespace fs           = std::filesystem;
-      std::string graph_name = fs::path( file_edges ).stem().string();
-      DEBUG_PRINT( "Resumo do Grafo:\n"
-                   << " Nome do Grafo: " << graph_name << "\n"
-                   << "  Vértices: " << boost::num_vertices( graph ) << "\n"
-                   << "  Arestas:  " << boost::num_edges( graph ) << "\n"
-                   << "  Grau máximo: " << delta_g << "\n" );
+    core::DefaultRNG rng;
+    ga::R3DDecoder   decoder( graph );
 
-      double density = calculate_density( boost::num_vertices( graph ), boost::num_edges( graph ) );
-      json   all_trials_results = json::array();
-      uint64_t best_fitness     = UINT64_MAX;
+    uint64_t                                 best_fitness = std::numeric_limits<uint64_t>::max();
+    std::vector<std::pair<uint64_t, double>> best_improvements;
+    std::vector<ga::Heuristic>               heuristics = { ga::h1, ga::h2, ga::h3, ga::h4 };
+    for ( size_t trial = 0; trial < trials; ++trial ) {
+      auto init_pop = ga::generate_population( graph, population_size, heuristics, rng );
+      ga::GAEngine<core::DefaultRNG, ga::R3DDecoder> ga_engine( init_pop,
+                                                                mutation_rate,
+                                                                crossover_rate,
+                                                                elite_rate,
+                                                                tournament_size,
+                                                                max_threads,
+                                                                rng,
+                                                                decoder );
 
-      core::DefaultRNG rng;
-      ga::R3DDecoder   decoder( graph );
+      uint64_t local_best_fitness = std::numeric_limits<uint64_t>::max();
+      auto     start_time         = std::chrono::steady_clock::now();
 
-      std::vector<ga::Heuristic> heuristics{ ga::h1, ga::h2, ga::h3, ga::h4 };
-      for ( size_t trial = 0; trial < trials; ++trial ) {
-        DEBUG_PRINT( "\n--- Rodando tentativa " << trial + 1 << " de " << trials << " ---" );
+      while ( true ) {
+        auto [current_best_chromosome, current_fitness] = ga_engine.evolve();
 
-        auto init_pop = ga::generate_population( graph, population_size, heuristics, rng );
-        ga::GAEngine<core::DefaultRNG, ga::R3DDecoder> ga_engine( init_pop,
-                                                                  mutation_rate,
-                                                                  crossover_rate,
-                                                                  elite_rate,
-                                                                  tournament_size,
-                                                                  max_threads,
-                                                                  rng,
-                                                                  decoder );
+        if ( current_fitness < local_best_fitness ) {
+          local_best_fitness = current_fitness;
+          best_improvements.push_back(
+            { local_best_fitness,
+              std::chrono::duration<double>( std::chrono::steady_clock::now() - start_time )
+                .count() } );
+        }
 
-        auto   start = std::chrono::steady_clock::now();
-        double best  = ga_engine.best_fitness();
+        auto                          current_time    = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = current_time - start_time;
+
+        if ( elapsed_seconds.count() >= time_limit ) {
+          break;
+        }
       }
 
-    } catch ( const std::exception &e ) {
-      std::cerr << "Erro: " << e.what() << "\n";
-      return json::array();
+      if ( local_best_fitness < best_fitness ) {
+        best_fitness = local_best_fitness;
+      }
     }
+
+    // Criando o JSON com os resultados
+    nlohmann::json result;
+    result["graph_name"]        = graph_name;
+    result["num_vertices"]      = totalVertices;
+    result["num_edges"]         = edges.size();
+    result["best_fitness"]      = best_fitness;
+    result["best_improvements"] = best_improvements;
+    result["num_trials"]        = trials;
+
+    std::ofstream ofs( output_path );
+    if ( ofs ) {
+      ofs << result.dump( 4 );  // Escreve o JSON com indentação de 4 espaços
+      std::cout << "Resultado salvo em: " << output_path << std::endl;
+    } else {
+      std::cerr << "Erro ao salvar o arquivo JSON." << std::endl;
+    }
+
+    return 0;
   }
+
 }  // namespace r3dp
