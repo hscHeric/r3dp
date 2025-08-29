@@ -2,6 +2,9 @@
 
 #include "population.hpp"
 
+#include <algorithm>
+#include <stdexcept>
+
 namespace r3dp::brkga {
   Population::Population( const Population &pop )
     : population( pop.population ), fitness( pop.fitness ) {}

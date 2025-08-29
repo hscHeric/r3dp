@@ -1,8 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <exception>
-#include <stdexcept>
 #include <vector>
 
 namespace r3dp::brkga {

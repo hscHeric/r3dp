@@ -3,7 +3,6 @@
 #include "population.hpp"
 
 #include <algorithm>
-#include <exception>
 #include <omp.h>
 #include <stdexcept>
 
