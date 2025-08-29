@@ -76,7 +76,8 @@ namespace r3dp {
     auto total_start_time = std::chrono::steady_clock::now();
 
     for ( size_t trial = 0; trial < trials; ++trial ) {
-      // Criando o GAEngine para cada tentativa
+      LOG_MESSAGE( "Iniciando tentativa: " << trial );
+
       auto initial_population =
         ga::generate_population( graph, population_size, { ga::h1, ga::h2, ga::h3, ga::h4 }, rng );
       ga::GAEngine<core::DefaultRNG, ga::R3DDecoder> ga_engine( initial_population,
@@ -88,9 +89,11 @@ namespace r3dp {
                                                                 rng,
                                                                 decoder );
 
+      auto trial_start_time = std::chrono::steady_clock::now();
+      auto per_trial_limit  = std::chrono::seconds( static_cast<long long>( time_limit ) );
+
       uint64_t current_best_fitness_in_trial = std::numeric_limits<uint64_t>::max();
 
-      // Loop de evolução baseado no tempo
       while ( true ) {
         auto [current_best_chromosome, current_fitness] = ga_engine.evolve();
 
@@ -99,18 +102,22 @@ namespace r3dp {
         }
 
         if ( current_best_fitness_in_trial < best_fitness_global ) {
-          best_fitness_global                              = current_best_fitness_in_trial;
-          auto                          current_total_time = std::chrono::steady_clock::now();
-          std::chrono::duration<double> elapsed_total_seconds =
-            current_total_time - total_start_time;
+          LOG_MESSAGE( "Novo melhor fitness encontrado: " << best_fitness_global << " -> "
+                                                          << current_best_fitness_in_trial );
+          best_fitness_global = current_best_fitness_in_trial;
+
+          auto                          now                   = std::chrono::steady_clock::now();
+          std::chrono::duration<double> elapsed_total_seconds = now - total_start_time;
           best_improvements.push_back( { best_fitness_global, elapsed_total_seconds.count() } );
         }
 
-        auto                          current_total_time    = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_total_seconds = current_total_time - total_start_time;
-
-        if ( elapsed_total_seconds.count() >= time_limit ) {
-          break;
+        auto now = std::chrono::steady_clock::now();
+        if ( time_limit > 0 ) {
+          std::chrono::duration<double> elapsed_trial_seconds = now - trial_start_time;
+          if ( elapsed_trial_seconds.count() >= time_limit ) {
+            LOG_MESSAGE( "Tempo da tentativa " << trial << " atingido (" << time_limit << "s)" );
+            break;
+          }
         }
       }
     }
