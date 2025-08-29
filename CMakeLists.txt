@@ -14,11 +14,19 @@ else()
       "OpenMP não encontrado. A avaliação paralela rodará sem paralelismo.")
 endif()
 
-add_executable(
-  r3dp
-  src/r3dp.cpp src/main.cpp src/genetic_algorithm/population.cpp
-  src/genetic_algorithm/r3d_decoder.cpp src/genetic_algorithm/pop_generator.cpp
-  src/core/graph.cpp)
+set(CORE_SOURCES src/core/graph.cpp)
+
+set(GA_SOURCES
+    src/genetic_algorithm/population.cpp src/genetic_algorithm/r3d_decoder.cpp
+    src/genetic_algorithm/pop_generator.cpp)
+
+set(BRKGA_SOURCES src/brkga/population.cpp)
+
+set(MAIN_SOURCES src/r3dp.cpp src/main.cpp)
+
+set(SOURCES ${MAIN_SOURCES} ${CORE_SOURCES} ${GA_SOURCES} ${BRKGA_SOURCES})
+
+add_executable(r3dp ${SOURCES})
 
 target_link_libraries(r3dp PUBLIC Boost::boost CLI11::CLI11
                                   nlohmann_json::nlohmann_json)
