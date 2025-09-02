@@ -1,6 +1,7 @@
 #pragma once
 
 #define DEBUG
+#define R3DP_USE_BRKGA
 #define R3DP_USE_GA
 
 #include "core/graph.hpp"
@@ -13,6 +14,12 @@
   #include "genetic_algorithm/pop_generator.hpp"
   #include "genetic_algorithm/r3d_decoder.hpp"
 #endif
+
+#ifdef R3DP_USE_BRKGA
+  #include "brkga/brkga.hpp"
+  #include "brkga/mt_rand.hpp"
+#endif
+
 #ifdef DEBUG
   #define LOG_MESSAGE( msg ) \
     std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << msg << std::endl;
@@ -54,5 +61,6 @@ namespace r3dp {
     constexpr const char * const string = "0.1.0";
   }  // namespace version
 
-  int run_ga( int argc, char *argv[] );
+  int run_ga( int argc, char **argv );
+  int run_brkga( int argc, char **argv );
 }  // namespace r3dp

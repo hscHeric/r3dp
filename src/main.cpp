@@ -4,8 +4,11 @@
 
 int main( int argc, char *argv[] ) {
 #ifdef R3DP_USE_GA
-  auto status = r3dp::run_ga( argc, argv );
-#endif  // R3DP_USE_GA
-  //
-  return status;
+  auto ga_status = r3dp::run_ga( argc, argv );
+#endif
+
+#ifdef R3DP_USE_BRKGA
+  auto brkga_status = r3dp::run_brkga( argc, argv );
+#endif
+  return 0;
 }

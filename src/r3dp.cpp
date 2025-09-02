@@ -140,4 +140,9 @@ namespace r3dp {
 
     return 0;
   }
+
+  int run_brkga( int argc, char **argv ) {
+    LOG_MESSAGE( "Rodando BRKGA" );
+    return 0;
+  }
 }  // namespace r3dp
