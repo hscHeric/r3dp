@@ -26,7 +26,7 @@ all: build
 conan:
 	@echo "==> Conan install ($(BUILD_TYPE))"
 	@mkdir -p "$(BUILD_DIR)"
-	conan install . -s build_type=$(BUILD_TYPE) -of="$(BUILD_DIR)"
+	conan install --build=missing . -s build_type=$(BUILD_TYPE) -of="$(BUILD_DIR)"
 
 configure: conan
 	@echo "==> CMake configure"
