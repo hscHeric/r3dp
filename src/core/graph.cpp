@@ -34,9 +34,7 @@ namespace r3dp::core {
       Vertex remapped_u = remapping.at( edge.first );
       Vertex remapped_v = remapping.at( edge.second );
 
-      if ( remapped_u == remapped_v ) {
-        uniqueRemappedEdges.insert( { remapped_u, remapped_v } );
-      } else {
+      if ( remapped_u != remapped_v ) {
         if ( remapped_u > remapped_v ) {
           std::swap( remapped_u, remapped_v );
         }
