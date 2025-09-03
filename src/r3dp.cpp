@@ -260,14 +260,21 @@ namespace r3dp {
       auto     per_trial_limit  = std::chrono::seconds( static_cast<long long>( time_limit ) );
 
       double current_best_fitness_in_trial = std::numeric_limits<double>::max();
+      std::vector<std::pair<double, double>> current_improvements;
 
       while ( std::chrono::steady_clock::now() - trial_start_time < per_trial_limit ) {
         algorithm.evolve();
         generation++;
 
         double current_best = algorithm.getBestFitness();
+
         if ( current_best < current_best_fitness_in_trial ) {
           current_best_fitness_in_trial = current_best;
+          auto   now                    = std::chrono::steady_clock::now();
+          double seconds = std::chrono::duration<double>( now - trial_start_time ).count();
+
+          current_improvements.emplace_back( current_best, seconds );
+
           LOG_MESSAGE( "Novo melhor fitness encontrado: " << current_best );
         }
 
@@ -277,6 +284,32 @@ namespace r3dp {
           }
         }
       }
+
+      if ( current_best_fitness_in_trial < best_fitness_global ) {
+        best_fitness_global = current_best_fitness_in_trial;
+        best_improvements   = current_improvements;
+      }
+    }
+
+    nlohmann::json result;
+    result["graph_name"]   = graph_name;
+    result["num_vertices"] = totalVertices;
+    result["num_edges"]    = edges.size();
+    result["best_fitness"] = best_fitness_global;
+    result["trials"]       = trials;
+
+    nlohmann::json improvements_json = nlohmann::json::array();
+    for ( const auto &[fitness, time] : best_improvements ) {
+      improvements_json.push_back( { { "fitness", fitness }, { "time", time } } );
+    }
+    result["best_improvements"] = improvements_json;
+
+    std::ofstream ofs( output_path );
+    if ( ofs ) {
+      ofs << result.dump( 4 );
+      LOG_MESSAGE( "Resultado salvo em: " << output_path );
+    } else {
+      LOG_ERR( "Erro ao salvar arquivo JSON" )
     }
 
     return 0;
