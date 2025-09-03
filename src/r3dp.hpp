@@ -4,22 +4,6 @@
 #define R3DP_USE_BRKGA
 #define R3DP_USE_GA
 
-#include "core/graph.hpp"
-#include "core/rng.hpp"
-
-#include <nlohmann/json.hpp>
-
-#ifdef R3DP_USE_GA
-  #include "genetic_algorithm/genetic_algorithm.hpp"
-  #include "genetic_algorithm/pop_generator.hpp"
-  #include "genetic_algorithm/r3d_decoder.hpp"
-#endif
-
-#ifdef R3DP_USE_BRKGA
-  #include "brkga/brkga.hpp"
-  #include "brkga/mt_rand.hpp"
-#endif
-
 #ifdef DEBUG
   #define LOG_MESSAGE( msg ) \
     std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << msg << std::endl;
