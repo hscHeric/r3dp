@@ -45,6 +45,5 @@ namespace r3dp {
     constexpr const char * const string = "0.1.0";
   }  // namespace version
 
-  int run_ga( int argc, char **argv );
   int run_brkga( int argc, char **argv );
 }  // namespace r3dp
