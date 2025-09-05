@@ -16,9 +16,9 @@ endif()
 
 set(CORE_SOURCES src/core/graph.cpp)
 
-set(GA_SOURCES
-    src/genetic_algorithm/population.cpp src/genetic_algorithm/r3d_decoder.cpp
-    src/genetic_algorithm/pop_generator.cpp)
+# set(GA_SOURCES
+#     src/genetic_algorithm/population.cpp src/genetic_algorithm/r3d_decoder.cpp
+#     src/genetic_algorithm/pop_generator.cpp)
 
 set(BRKGA_SOURCES src/brkga/population.cpp)
 
