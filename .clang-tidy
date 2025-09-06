@@ -1,0 +1,22 @@
+Checks:
+  - "*"
+  - "-modernize-use-trailing-return-type" # Desativa a exigência de retornar tipo no final da função
+  - "-clang-analyzer-*" # Desativa a análise do clang (se não for necessária)
+  - "-cppcoreguidelines-avoid-magic-numbers" # Desativa a recomendação para evitar números mágicos (se você desejar)
+  - "-readability-*" # Pode ativar/desativar regras de legibilidade
+  - "google-runtime-references" # Use referências para evitar cópias desnecessárias em código Google Style
+
+WarningsAsErrors: ""
+HeaderFilterRegex: ".*"
+FormatStyle: file
+
+CheckOptions:
+  - key: readability-function-casing
+    value: "snake_case"
+
+  - key: readability-identifier-naming
+    value: "snake_case"
+  - key: readability-variable-casing
+    value: "snake_case"
+  - key: readability-function-casing
+    value: "snake_case"
