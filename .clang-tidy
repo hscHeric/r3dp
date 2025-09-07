@@ -1,22 +1,70 @@
 Checks:
-  - "*"
-  - "-modernize-use-trailing-return-type" # Desativa a exigência de retornar tipo no final da função
-  - "-clang-analyzer-*" # Desativa a análise do clang (se não for necessária)
-  - "-cppcoreguidelines-avoid-magic-numbers" # Desativa a recomendação para evitar números mágicos (se você desejar)
-  - "-readability-*" # Pode ativar/desativar regras de legibilidade
-  - "google-runtime-references" # Use referências para evitar cópias desnecessárias em código Google Style
+  # Desabilita todos os checks por padrão
+  - "-*"
 
-WarningsAsErrors: ""
-HeaderFilterRegex: ".*"
+  # Desabilita verificações de bibliotecas/estilos específicos
+  - "-abseil-*" # Regras específicas do Abseil
+  - "-altera-*" # FPGA Altera
+  - "-android-*" # Android
+  - "-darwin-*" # macOS/iOS
+  - "-fuchsia-*" # SO Fuchsia
+  - "-google-*" # Estilo Google
+  - "-hicpp-*" # High Integrity C++ (redundante com cppcoreguidelines)
+  - "-linuxkernel-*" # Kernel Linux
+  - "-llvm-*" # Estilo LLVM
+  - "-llvmlibc-*" # libc do LLVM
+  - "-mpi-*" # MPI (paralelismo distribuído)
+  - "-objc-*" # Objective-C
+  - "-zircon-*" # Kernel Zircon (Fuchsia)
+
+  # Habilita categorias principais
+  - "clang-analyzer-*" # Analisador estático do Clang
+  - "cert-*" # Regras CERT C/C++ (segurança)
+  - "cppcoreguidelines-*" # C++ Core Guidelines
+  - "modernize-*" # Sugestões de modernização (C++11+)
+  - "performance-*" # Melhorias de performance
+  - "portability-*" # Problemas de portabilidade
+  - "readability-*" # Melhorias de legibilidade
+  - "bugprone-*" # Padrões que indicam bugs
+  - "openmp-*" # Regras específicas para OpenMP
+  - "boost-*" # Regras específicas para Boost
+
+  # Desabilita verificações muito opinativas
+  - "-readability-identifier-length" # Tamanho de identificador
+  - "-readability-identifier-naming" # Nomeação (usamos CheckOptions)
+  - "-readability-braces-around-statements" # If/while sem chaves
+  - "-modernize-use-trailing-return-type" # `auto f() -> tipo`
+  - "-performance-avoid-endl" # Uso de std::endl
+
+  # Desabilita verificações com muitos falsos positivos
+  - "-cert-err58-cpp" # Arrays C (já coberto em modernize)
+  - "-cert-err60-cpp" # `throw std::exception`
+  - "-cppcoreguidelines-avoid-c-arrays"
+  - "-cppcoreguidelines-pro-bounds-array-to-pointer-decay"
+  - "-misc-non-private-member-variables-in-classes"
+  - "-readability-function-size"
+  - "-readability-function-cognitive-complexity"
+  - "-readability-magic-numbers"
+  - "-readability-isolate-declaration"
+
+WarningsAsErrors: "cert-*,bugprone-*,clang-analyzer-*"
+HeaderFilterRegex: "*"
 FormatStyle: file
 
 CheckOptions:
-  - key: readability-function-casing
-    value: "snake_case"
-
-  - key: readability-identifier-naming
-    value: "snake_case"
-  - key: readability-variable-casing
-    value: "snake_case"
-  - key: readability-function-casing
-    value: "snake_case"
+  - key: readability-identifier-naming.FunctionCase
+    value: snake_case
+  - key: readability-identifier-naming.VariableCase
+    value: snake_case
+  - key: readability-identifier-naming.ClassCase
+    value: PascalCase
+  - key: readability-identifier-naming.EnumCase
+    value: PascalCase
+  - key: readability-identifier-naming.TypedefCase
+    value: PascalCase
+  - key: readability-identifier-naming.MacroCase
+    value: UPPER_CASE
+  - key: readability-function-size.Threshold
+    value: "200"
+  - key: readability-function-cognitive-complexity.Threshold
+    value: "20"
