@@ -60,7 +60,7 @@ namespace r3dp::hho {
       fitness_values[i] = this->ref_decoder.decode( hawks[i] );
     }
 
-    double current_best_fitness = -std::numeric_limits<double>::infinity();
+    double current_best_fitness = std::numeric_limits<double>::infinity();
     size_t current_best_index   = 1;
 
     for ( size_t i = 0; i < population_size; ++i ) {
