@@ -41,11 +41,11 @@ namespace r3dp::hho {
      * @param ref_decoder Uma referência para o decodificador de aptidão (fitness).
      * @param ref_rng Uma referência para o gerador de números aleatórios.
      */
-    HHO( const unsigned population_size,
-         const unsigned dimension,
-         const double   lower_bound,
-         const double   upper_bound,
-         const unsigned max_threads,
+    HHO( unsigned       population_size,
+         unsigned       dimension,
+         double         lower_bound,
+         double         upper_bound,
+         unsigned       max_threads,
          const Decoder &ref_decoder,
          RNG           &ref_rng );
 
@@ -63,11 +63,11 @@ namespace r3dp::hho {
      * @param ref_decoder Uma referência para o decodificador de aptidão (fitness).
      * @param ref_rng Uma referência para o gerador de números aleatórios.
      */
-    HHO( const unsigned             population_size,
-         const unsigned             dimension,
+    HHO( unsigned                   population_size,
+         unsigned                   dimension,
          const std::vector<double> &lower_bounds,
          const std::vector<double> &upper_bounds,
-         const unsigned             max_threads,
+         unsigned                   max_threads,
          const Decoder             &ref_decoder,
          RNG                       &ref_rng );
 
@@ -85,19 +85,19 @@ namespace r3dp::hho {
      * @brief Retorna a melhor solução encontrada até o momento.
      * @return Um vetor de `double` representando a melhor posição (solução).
      */
-    std::vector<double> get_best_solution() const;
+    [[nodiscard]] std::vector<double> get_best_solution() const;
 
     /**
      * @brief Retorna o valor de aptidão (fitness) da melhor solução.
      * @return O valor de aptidão da melhor solução.
      */
-    double get_best_fitness() const;
+    [[nodiscard]] double get_best_fitness() const;
 
     /**
      * @brief Retorna o número da iteração atual.
      * @return O número da iteração.
      */
-    unsigned get_iteration() const;
+    [[nodiscard]] unsigned get_iteration() const;
 
     /**
      * @brief Reinicia o estado do algoritmo para uma nova execução.

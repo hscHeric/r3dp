@@ -5,7 +5,6 @@
 #include "brkga/brkga_decoder.hpp"
 #include "brkga/mt_rand.hpp"
 #include "core/graph.hpp"
-#include "core/rng.hpp"
 
 #include <boost/graph/detail/adjacency_list.hpp>
 #include <chrono>
@@ -14,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <random>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 namespace r3dp {
@@ -34,24 +34,24 @@ namespace r3dp {
     std::string file_path = "default.txt";
     app.add_option( "-f,--file", file_path, "Arquivo de arestas (edges.txt)" )->required();
 
-    unsigned int population_size = 200;
+    unsigned int population_size = brkga::DEFAULT_POP_SIZE;
     app.add_option( "-p,--pop-size", population_size, "Tamanho da população (>= 2)" )
-      ->check( CLI::Range( 2u, UINT_MAX ) );
+      ->check( CLI::Range( 2U, UINT_MAX ) );
 
-    double elite_fraction = 0.10;
+    double elite_fraction = brkga::DEFAULT_ELITE_FRACTION;
     app
       .add_option(
         "--elite-fraction", elite_fraction, "Fração da população que pertence a elite em [0,1]" )
       ->check( CLI::Range( 0.0, 1.0 ) );
 
-    double mutants_fraction = 0.10;
+    double mutants_fraction = brkga::DEFAULT_MUTANTS_FRACTION;
     app
       .add_option( "--mutants-fraction",
                    mutants_fraction,
                    "Fração da população que vai ser substituida por mutantes em [0,1]" )
       ->check( CLI::Range( 0.0, 1.0 ) );
 
-    double elite_inheritance_prob = 0.70;
+    double elite_inheritance_prob = brkga::DEFAULT_ELITE_INHERIT_PROB;
     app
       .add_option( "--elite-inheritance-prob",
                    elite_inheritance_prob,
@@ -74,7 +74,7 @@ namespace r3dp {
       ->check( CLI::PositiveNumber )
       ->required();
 
-    unsigned migration_interval = 100;
+    unsigned migration_interval = brkga::DEFAULT_MIGRATION_INTERVAL;
     app
       .add_option( "--migration-interval",
                    migration_interval,
@@ -94,7 +94,7 @@ namespace r3dp {
 
     unsigned int trials = 1;
     app.add_option( "-r,--runs", trials, "Número de tentativas" )
-      ->check( CLI::Range( 1u, UINT_MAX ) );
+      ->check( CLI::Range( 1U, UINT_MAX ) );
 
     argv = app.ensure_utf8( argv );
     CLI11_PARSE( app, argc, argv );

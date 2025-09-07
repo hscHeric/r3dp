@@ -4,22 +4,22 @@
 #include <iostream>
 
 namespace r3dp::core {
-  std::pair<Vertex, std::set<Edge>> read_graph_from_file( const std::string &filePath ) {
-    std::ifstream file( filePath );
+  std::pair<Vertex, std::set<Edge>> read_graph_from_file( const std::string &file_path ) {
+    std::ifstream file( file_path );
     if ( !file.is_open() ) {
-      std::cerr << "Erro ao abrir o arquivo: " << filePath << std::endl;
+      std::cerr << "Erro ao abrir o arquivo: " << file_path << std::endl;
       return { 0, {} };
     }
 
     std::set<Vertex>  uniqueVertices;
     std::vector<Edge> originalEdges;
-    Vertex            u, v;
+    Vertex            u = 0, v = 0;
 
     // Lê todas as arestas e todos os vértices
     while ( file >> u >> v ) {
       uniqueVertices.insert( u );
       uniqueVertices.insert( v );
-      originalEdges.push_back( { u, v } );
+      originalEdges.emplace_back( u, v );
     }
 
     std::unordered_map<Vertex, Vertex> remapping;

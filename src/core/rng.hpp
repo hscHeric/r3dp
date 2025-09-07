@@ -10,11 +10,6 @@ namespace r3dp::core {
    */
   class RNG {
   private:
-    RNG()                         = delete;  ///< Impede a criação de instâncias de RNG.
-    ~RNG()                        = delete;  ///< Impede a destruição de instâncias de RNG.
-    RNG( const RNG & )            = delete;  ///< Impede a cópia de instâncias de RNG.
-    void operator=( const RNG & ) = delete;  ///< Impede a atribuição de instâncias de RNG.
-
     /**
      * @brief Gera um motor de números aleatórios de forma thread-safe.
      *
@@ -29,6 +24,13 @@ namespace r3dp::core {
     }
 
   public:
+    RNG( RNG && )                 = delete;  ///< Impede a movimentação de instâncias de RNG.
+    RNG &operator=( RNG && )      = delete;  ///< Impede a move de instâncias de RNG.
+    RNG()                         = delete;  ///< Impede a criação de instâncias de RNG.
+    ~RNG()                        = delete;  ///< Impede a destruição de instâncias de RNG.
+    RNG( const RNG & )            = delete;  ///< Impede a cópia de instâncias de RNG.
+    void operator=( const RNG & ) = delete;  ///< Impede a atribuição de instâncias de RNG.
+
     /**
      * @brief Gera um número aleatório inteiro.
      *
@@ -37,7 +39,7 @@ namespace r3dp::core {
      * @tparam T Tipo de dado (deve ser um tipo inteiro).
      * @return T Número aleatório gerado.
      */
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     static T random() {
       return std::uniform_int_distribution<T>()( engine() );
     }
@@ -50,7 +52,7 @@ namespace r3dp::core {
      * @tparam T Tipo de dado (deve ser um tipo de ponto flutuante).
      * @return T Número aleatório gerado.
      */
-    template <typename T, std::enable_if_t<std::is_floating_point<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
     static T random() {
       return std::uniform_real_distribution<T>()( engine() );
     }
@@ -67,7 +69,7 @@ namespace r3dp::core {
      * @return T Número aleatório gerado no intervalo [min, max].
      * @throws std::invalid_argument Se o valor de `min` for maior que o de `max`.
      */
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     static T random_range( T min, T max ) {
       if ( min > max )
         throw std::invalid_argument( "O valor mínimo não pode ser maior que o valor máximo." );
@@ -86,7 +88,7 @@ namespace r3dp::core {
      * @return T Número aleatório gerado no intervalo [min, max].
      * @throws std::invalid_argument Se o valor de `min` for maior que o de `max`.
      */
-    template <typename T, std::enable_if_t<std::is_floating_point<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
     static T random_range( T min, T max ) {
       if ( min > max )
         throw std::invalid_argument( "O valor mínimo não pode ser maior que o valor máximo." );
