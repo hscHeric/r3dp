@@ -37,6 +37,7 @@ namespace r3dp::hho {
      * de vartices para o r3dp).
      * @param lower_bound O limite inferior único para todas as dimensões.
      * @param upper_bound O limite superior único para todas as dimensões.
+     * @param max_iterations O número máximo de iterações.
      * @param max_threads O número máximo de threads a serem usadas com OpenMP.
      * @param ref_decoder Uma referência para o decodificador de aptidão (fitness).
      * @param ref_rng Uma referência para o gerador de números aleatórios.
@@ -45,6 +46,7 @@ namespace r3dp::hho {
          unsigned       dimension,
          double         lower_bound,
          double         upper_bound,
+         unsigned       max_iterations,
          unsigned       max_threads,
          const Decoder &ref_decoder,
          RNG           &ref_rng );
@@ -59,6 +61,7 @@ namespace r3dp::hho {
      * @param dimension O número de variáveis do problema (dimensão da solução).
      * @param lower_bounds Um vetor de limites inferiores, um para cada dimensão.
      * @param upper_bounds Um vetor de limites superiores, um para cada dimensão.
+     * @param max_iterations O número máximo de iterações.
      * @param max_threads O número máximo de threads a serem usadas com OpenMP.
      * @param ref_decoder Uma referência para o decodificador de aptidão (fitness).
      * @param ref_rng Uma referência para o gerador de números aleatórios.
@@ -67,6 +70,7 @@ namespace r3dp::hho {
          unsigned                   dimension,
          const std::vector<double> &lower_bounds,
          const std::vector<double> &upper_bounds,
+         unsigned                   max_iterations,
          unsigned                   max_threads,
          const Decoder             &ref_decoder,
          RNG                       &ref_rng );
@@ -112,6 +116,7 @@ namespace r3dp::hho {
     const unsigned      population_size;
     std::vector<double> lower_bounds_vec;
     std::vector<double> upper_bounds_vec;
+    const unsigned      max_iterations;  // Novo membro de classe
     const unsigned      max_threads;
 
     // Estado do algoritmo

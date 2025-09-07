@@ -47,6 +47,7 @@ Checks:
   - "-readability-magic-numbers"
   - "-readability-isolate-declaration"
   - "-cppcoreguidelines-avoid-const-or-ref-data-members" #remova o aviso para valores const dentro de classes sem inicialização
+  - "-bugprone-easily-swappable-parameters"
 
 WarningsAsErrors: "cert-*,bugprone-*,clang-analyzer-*"
 HeaderFilterRegex: "*"
