@@ -84,7 +84,7 @@ namespace r3dp::hho {
 
   template <class Decoder, class RNG>
   [[nodiscard]] std::vector<double> HHO<Decoder, RNG>::get_best_solution() const {
-    return {};
+    return best_position;
   }
 
   template <class Decoder, class RNG>
@@ -98,7 +98,13 @@ namespace r3dp::hho {
   }
 
   template <class Decoder, class RNG>
-  void HHO<Decoder, RNG>::reset() {}
+  void HHO<Decoder, RNG>::reset() {
+    hawks.clear();
+    best_position.clear();
+    best_fitness = std::numeric_limits<double>::infinity();
+    iteration    = 0;
+    initialize_hawks();
+  }
 
   template <class Decoder, class RNG>
   std::vector<double> HHO<Decoder, RNG>::levy_flight( int d ) {
