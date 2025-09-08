@@ -55,7 +55,9 @@ namespace r3dp::hho {
   template <class Decoder, class RNG>
   void HHO<Decoder, RNG>::step() {
     std::vector<double> fitness_values( population_size );
-#pragma omp parallel for num_threads( max_threads )
+
+    // clang-format off
+    #pragma omp parallel for num_threads( max_threads ) default( none )  // clang-format on
     for ( size_t i = 0; i < population_size; ++i ) {
       fitness_values[i] = this->ref_decoder.decode( hawks[i] );
     }
@@ -77,9 +79,11 @@ namespace r3dp::hho {
 
     rabbit_energy = 2 * ( 1 - static_cast<double>( iteration ) / max_iterations );
 
-    // TODO - Atualiza a posição dos falcões
-#pragma omp parallel for num_threads( max_threads )
-    for ( size_t i = 0; i < population_size; ++i ) {}
+    // clang-format off
+    #pragma omp parallel for num_threads( max_threads ) default( none )  // clang-format on
+    for ( size_t i = 0; i < population_size; ++i ) {
+      // TODO (hscheric): Atualizar a posição de todos os falcões
+    }
   }
 
   template <class Decoder, class RNG>
@@ -114,7 +118,9 @@ namespace r3dp::hho {
   template <class Decoder, class RNG>
   void HHO<Decoder, RNG>::initialize_hawks() {
     hawks.resize( population_size );
-#pragma omp parallel for num_threads( max_threads )
+
+    // clang-format off
+    #pragma omp parallel for num_threads( max_threads ) default(none)  // clang-format on
     for ( size_t i = 0; i < population_size; ++i ) {
       hawks[i].resize( dimension );
       for ( unsigned j = 0; j < dimension; ++j ) {

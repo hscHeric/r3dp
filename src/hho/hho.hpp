@@ -134,4 +134,5 @@ namespace r3dp::hho {
     std::vector<double> levy_flight( int d );
     void                initialize_hawks();
   };
+
 }  // namespace r3dp::hho
