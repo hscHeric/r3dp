@@ -8,7 +8,6 @@ Checks:
   - "-android-*" # Android
   - "-darwin-*" # macOS/iOS
   - "-fuchsia-*" # SO Fuchsia
-  - "-google-*" # Estilo Google
   - "-hicpp-*" # High Integrity C++ (redundante com cppcoreguidelines)
   - "-linuxkernel-*" # Kernel Linux
   - "-llvm-*" # Estilo LLVM
@@ -28,6 +27,7 @@ Checks:
   - "bugprone-*" # Padrões que indicam bugs
   - "openmp-*" # Regras específicas para OpenMP
   - "boost-*" # Regras específicas para Boost
+  - "google-*" # Estilo Google
 
   # Desabilita verificações muito opinativas
   - "-readability-identifier-length" # Tamanho de identificador
