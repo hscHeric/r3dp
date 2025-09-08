@@ -61,4 +61,5 @@ namespace r3dp {
   }  // namespace brkga
 
   int run_brkga( int argc, char **argv );
+  int run_hho( int argc, char **argv );
 }  // namespace r3dp
