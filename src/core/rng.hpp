@@ -71,8 +71,9 @@ namespace r3dp::core {
      */
     template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     static T random_range( T min, T max ) {
-      if ( min > max )
+      if ( min > max ) {
         throw std::invalid_argument( "O valor mínimo não pode ser maior que o valor máximo." );
+      }
       return std::uniform_int_distribution<T>( min, max )( engine() );
     }
 
@@ -90,8 +91,9 @@ namespace r3dp::core {
      */
     template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
     static T random_range( T min, T max ) {
-      if ( min > max )
+      if ( min > max ) {
         throw std::invalid_argument( "O valor mínimo não pode ser maior que o valor máximo." );
+      }
       return std::uniform_real_distribution<T>( min, max )( engine() );
     }
 
