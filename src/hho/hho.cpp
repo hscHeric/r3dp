@@ -9,7 +9,6 @@
 
 namespace r3dp::hho {
 
-  // The template parameter for HHO should only be 'Decoder'
   template <class Decoder>
   HHO<Decoder>::HHO( unsigned       population_size,
                      unsigned       dimension,
@@ -46,7 +45,6 @@ namespace r3dp::hho {
     iteration    = 0;
   }
 
-  // The template parameter for HHO should only be 'Decoder'
   template <class Decoder>
   HHO<Decoder>::HHO( unsigned                   population_size,
                      unsigned                   dimension,
@@ -115,6 +113,7 @@ namespace r3dp::hho {
     best_fitness = std::numeric_limits<double>::infinity();
     iteration    = 0;
     convergence_curve.clear();
+    initialize_hawks();
   }
 
   template <class Decoder>
@@ -127,8 +126,7 @@ namespace r3dp::hho {
     for ( size_t i = 0; i < population_size; ++i ) {
       hawks[i].resize( dimension );
       for ( unsigned j = 0; j < dimension; ++j ) {
-        hawks[i][j] =
-          this->ref_rng.random_range<double>( lower_bounds_vec[j], upper_bounds_vec[j] );
+        hawks[i][j] = this->ref_rng.random_range( lower_bounds_vec[j], upper_bounds_vec[j] );
       }
     }
   }
@@ -174,18 +172,19 @@ namespace r3dp::hho {
     auto E1 = JUMP_STRENGTH_FACTOR * ( ESCAPE_ENERGY_BOUND_EXPLORATION -
                                        static_cast<double>( iteration ) / max_iterations );
 
+    const auto hawks_prev = hawks;
+
     // clang-format off
     #pragma omp parallel for num_threads(max_threads) default(none)
     // clang-format on
     for ( size_t i = 0; i < population_size; ++i ) {
       // energia de escape do coelho
-      double E0 = ( JUMP_STRENGTH_FACTOR * ref_rng.random_range<double>( 0.0, 1.0 ) ) -
+      double E0 = ( JUMP_STRENGTH_FACTOR * ref_rng.random_range( 0.0, 1.0 ) ) -
                   ESCAPE_ENERGY_BOUND_EXPLORATION;
       double escaping_energy = E1 * E0;
 
       if ( std::abs( escaping_energy ) >= 1 ) {
         // TODO: Fase de exploração
-        double q = ref_rng.random_range<double>( 0.0, 1.0 );
 
       } else if ( std::abs( escaping_energy ) < 1 ) {
         // TODO: Fase de transição
