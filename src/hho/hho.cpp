@@ -116,7 +116,12 @@ namespace r3dp::hho {
 
   template <class Decoder>
   void HHO<Decoder>::initialize_hawks() {
-    // TODO: Implementar de forma sequencial
+    hawks.assign( population_size, std::vector<double>( dimension, 0.0 ) );
+    for ( size_t i = 0; i < population_size; ++i ) {
+      for ( size_t j = 0; j < dimension; ++j ) {
+        hawks[i][j] = this->ref_rng.random_range( lower_bounds_vec[j], upper_bounds_vec[j] );
+      }
+    }
   }
 
   template <class Decoder>
