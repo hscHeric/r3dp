@@ -174,18 +174,21 @@ namespace r3dp::hho {
                       ( ESCAPE_ENERGY_BOUND_EXPLORATION -
                         static_cast<double>( iteration ) / static_cast<double>( max_iterations ) );
 
-    std::vector<double> mean_pos( dimension, 0.0 );
+    std::vector<double> x_mean( dimension, 0.0 );
     for ( unsigned j = 0; j < dimension; ++j ) {
       double acc = 0.0;
       for ( size_t i = 0; i < population_size; ++i ) {
         acc += hawks[i][j];
       }
-      mean_pos[j] = acc / static_cast<double>( population_size );
+      x_mean[j] = acc / static_cast<double>( population_size );
     }
 
     const auto hawks_prev = hawks;
 
     // geração de todos os números aleatorios usados
+    // na equação que define os variaveis usadas para as operações são definidas r1,r2,r3 e r4, no
+    // entando só mente duas são usadas por vez, por isso vou gerar apenas r1 e r2, e usar elas como
+    // r3 e r4 respectivamente quando necessario
     std::vector<double> E0_vec( population_size );
     std::vector<double> q_vec( population_size );
     std::vector<double> r1_vec( population_size );
@@ -230,11 +233,37 @@ namespace r3dp::hho {
       std::vector<double> next( dimension );
 
       if ( std::abs( escaping_energy ) >= 1 ) {
-        // TODO: Fase de exploração
+        const auto r1 = r1_vec[i];
+        const auto r2 = r2_vec[i];
+
+        // Fase de exploração
+        if ( q_vec[i] >= 0.5 ) {
+          const auto &x_rand = hawks_prev[rand_idx[i]];
+          const auto &x_i    = hawks_prev[i];
+          for ( size_t j = 0; j < dimension; ++j ) {
+            next[j] = x_rand[j] - ( r1 * std::abs( x_rand[j] - ( 2 * r2 * x_i[j] ) ) );
+          }
+        } else {
+          for ( unsigned j = 0; j < dimension; ++j ) {
+            const auto &x_rabbit = best_position;
+            // r1 -> r3
+            // r2 -> r4
+            next[j] =
+              x_rabbit[j] - x_mean[j] -
+              r1 * ( lower_bounds_vec[j] + ( r2 * ( upper_bounds_vec[j] - lower_bounds_vec[j] ) ) );
+          }
+        }
       } else {
         // TODO: Fases de transição e de exploitation
       }
+
+      for ( size_t j = 0; j < dimension; ++j ) {
+        next[j] = std::clamp( next[j], lower_bounds_vec[j], upper_bounds_vec[j] );
+      }
+      hawks[i].swap( next );
     }
+    convergence_curve.push_back( best_fitness );
+    ++iteration;
   }
 
 }  // namespace r3dp::hho

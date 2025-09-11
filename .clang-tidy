@@ -50,6 +50,8 @@ Checks:
   - "-bugprone-easily-swappable-parameters"
   - "-boost-use-ranges"
   - "-modernize-use-ranges"
+  - "-cppcoreguidelines-avoid-magic-numbers"
+  - "-google-readability-todo"
 
 WarningsAsErrors: "cert-*,bugprone-*,clang-analyzer-*"
 HeaderFilterRegex: "*"
