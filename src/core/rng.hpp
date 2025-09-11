@@ -4,8 +4,9 @@
 #include <random>
 #include <stdexcept>
 
-namespace r3dp::core {
+#define DEFAULT_P_TRUE_BOOL 0.5
 
+namespace r3dp::core {
   /**
    * @class RNG
    * @brief Um wrapper para geradores de números pseudoaleatórios.
@@ -343,8 +344,6 @@ namespace r3dp::core {
     }
 
   private:
-    engine_type             engine_;  ///< O motor de geração de números pseudoaleatórios.
-    static constexpr double DEFAULT_P_TRUE_BOOL =
-      0.5;  ///< Probabilidade padrão para `random_bool`.
+    engine_type engine_;  ///< O motor de geração de números pseudoaleatórios.
   };
 }  // namespace r3dp::core
