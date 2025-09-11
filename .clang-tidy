@@ -48,6 +48,8 @@ Checks:
   - "-readability-isolate-declaration"
   - "-cppcoreguidelines-avoid-const-or-ref-data-members" #remova o aviso para valores const dentro de classes sem inicialização
   - "-bugprone-easily-swappable-parameters"
+  - "-boost-use-ranges"
+  - "-modernize-use-ranges"
 
 WarningsAsErrors: "cert-*,bugprone-*,clang-analyzer-*"
 HeaderFilterRegex: "*"
