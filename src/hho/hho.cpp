@@ -126,7 +126,49 @@ namespace r3dp::hho {
 
   template <class Decoder>
   void HHO<Decoder>::step() {
-    // TODO: Onde usar rng tem que ser sequencial
+    if ( iteration >= max_iterations ) {
+      return;  // Criterio de parada do algoritmo
+    }
+
+    // Restringe as variaveis de toda a população de soluções aos limitantes superiores e inferiores
+    // passados
+
+    // clang-format off
+    #pragma omp parallel for num_threads( max_threads ) default( none )  // clang-format on
+    for ( size_t i = 0; i < population_size; ++i ) {
+      for ( unsigned j = 0; j < dimension; ++j ) {
+        hawks[i][j] = std::clamp( hawks[i][j], lower_bounds_vec[j], upper_bounds_vec[j] );
+      }
+    }
+
+    std::vector<double> fitness_values( population_size, std::numeric_limits<double>::infinity() );
+    // clang-format off
+    #pragma omp parallel for num_threads( max_threads ) default( none )  // clang-format on
+    for ( size_t i = 0; i < population_size; ++i ) {
+      fitness_values[i] = this->ref_decoder.decode(
+        hawks[i] );  // aqui estou paralelizando partindo do pré-suporto que o decoder é
+                     // thread-safe, acho que vou implementar o decoder de forma que ele não
+                     // modifique as solução inválidas, mas na verdade incremente o fitness como se
+                     // fosse de uma solução válide. por exemplo, suponha um vértice v com f[v] = 1,
+                     // v é invalido pela definição do r3dp, se falta um valor n de rotulos na
+                     // vizinhança de v, então o vértice v vai aumentar o fitness em n ao invés de
+                     // aumentar em 1, assim não vou modificar os falcoes e vou ter um fitness
+                     // relativo a solução válida
+    }
+
+    // pegando o melhor fitness atual das soluções
+    double current_best_fitness = std::numeric_limits<double>::infinity();
+    size_t current_best_index   = 0;
+    for ( size_t i = 0; i < population_size; ++i ) {
+      if ( fitness_values[i] < current_best_fitness ) {
+        current_best_fitness = fitness_values[i];
+        current_best_index   = i;
+      }
+    }
+    if ( current_best_fitness < best_fitness ) {
+      best_fitness  = current_best_fitness;
+      best_position = hawks[current_best_index];
+    }
   }
 
 }  // namespace r3dp::hho
