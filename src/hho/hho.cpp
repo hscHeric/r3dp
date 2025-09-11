@@ -169,6 +169,72 @@ namespace r3dp::hho {
       best_fitness  = current_best_fitness;
       best_position = hawks[current_best_index];
     }
+
+    const double E1 = JUMP_STRENGTH_FACTOR *
+                      ( ESCAPE_ENERGY_BOUND_EXPLORATION -
+                        static_cast<double>( iteration ) / static_cast<double>( max_iterations ) );
+
+    std::vector<double> mean_pos( dimension, 0.0 );
+    for ( unsigned j = 0; j < dimension; ++j ) {
+      double acc = 0.0;
+      for ( size_t i = 0; i < population_size; ++i ) {
+        acc += hawks[i][j];
+      }
+      mean_pos[j] = acc / static_cast<double>( population_size );
+    }
+
+    const auto hawks_prev = hawks;
+
+    // geração de todos os números aleatorios usados
+    std::vector<double> E0_vec( population_size );
+    std::vector<double> q_vec( population_size );
+    std::vector<double> r1_vec( population_size );
+    std::vector<double> r2_vec( population_size );
+    std::vector<double> J_vec( population_size );
+    std::vector<size_t> rand_idx( population_size );
+
+    for ( size_t i = 0; i < population_size; ++i ) {
+      const double u0 = this->ref_rng.random_range( 0.0, 1.0 );
+      E0_vec[i]       = ( JUMP_STRENGTH_FACTOR * u0 ) - ESCAPE_ENERGY_BOUND_EXPLORATION;
+
+      q_vec[i]  = this->ref_rng.random_range( 0.0, 1.0 );
+      r1_vec[i] = this->ref_rng.random_range( 0.0, 1.0 );
+      r2_vec[i] = this->ref_rng.random_range( 0.0, 1.0 );
+
+      J_vec[i] = JUMP_STRENGTH_FACTOR * ( 1.0 - this->ref_rng.random_range( 0.0, 1.0 ) );
+
+      if ( population_size > 1 ) {
+        auto r = static_cast<size_t>( this->ref_rng.random_range( 0.0, 1.0 ) * population_size );
+        if ( r == i ) {
+          r = ( r + 1 ) % population_size;
+        }
+        rand_idx[i] = r;
+      } else {
+        rand_idx[i] = i;
+      }
+    }
+    /**
+     * Loop principal, aqui o loop é divido em três fases
+     *
+     * A fase de exploração vai acontecer quando a energia de escape do coelho é >= que 1 nesse caso
+     * vão se ter duas estrategias de modificação do falção escolhidas a partir da geração de um
+     * número aleatorio q, caso a energia de escape do coelho tenha acabado, então se entra na fase
+     * de transição
+     */
+    // clang-format off
+    #pragma omp parallel for num_threads( max_threads ) default( none )  // clang-format on
+    for ( size_t i = 0; i < population_size; ++i ) {
+      // TODO: Atualiza todas as posições
+      const double escaping_energy = E1 * E0_vec[i];
+
+      std::vector<double> next( dimension );
+
+      if ( std::abs( escaping_energy ) >= 1 ) {
+        // TODO: Fase de exploração
+      } else {
+        // TODO: Fases de transição e de exploitation
+      }
+    }
   }
 
 }  // namespace r3dp::hho
