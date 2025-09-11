@@ -1,7 +1,5 @@
 #include "hho.hpp"
 
-#include <algorithm>
-#include <cmath>
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -17,7 +15,7 @@ namespace r3dp::hho {
                      unsigned       max_iterations,
                      unsigned       max_threads,
                      const Decoder &ref_decoder,
-                     core::RNG     &ref_rng )
+                     core::RNG<>   &ref_rng )
     : dimension( dimension )
     , population_size( population_size )
     , max_iterations( max_iterations )
@@ -53,7 +51,7 @@ namespace r3dp::hho {
                      unsigned                   max_iterations,
                      unsigned                   max_threads,
                      const Decoder             &ref_decoder,
-                     core::RNG                 &ref_rng )
+                     core::RNG<>               &ref_rng )
     : dimension( dimension )
     , population_size( population_size )
     , lower_bounds_vec( lower_bounds )
@@ -118,78 +116,12 @@ namespace r3dp::hho {
 
   template <class Decoder>
   void HHO<Decoder>::initialize_hawks() {
-    hawks.resize( population_size );
-
-    // clang-format off
-    #pragma omp parallel for num_threads(max_threads) default(none)
-    // clang-format on
-    for ( size_t i = 0; i < population_size; ++i ) {
-      hawks[i].resize( dimension );
-      for ( unsigned j = 0; j < dimension; ++j ) {
-        hawks[i][j] = this->ref_rng.random_range( lower_bounds_vec[j], upper_bounds_vec[j] );
-      }
-    }
+    // TODO: Implementar de forma sequencial
   }
 
   template <class Decoder>
   void HHO<Decoder>::step() {
-    // Verifica o criterio de parada baseado no número máximo de iterações
-    if ( iteration >= max_iterations ) {
-      return;  // não fazer nada pois já atingiu o limite;
-    }
-
-    // clang-format off
-    #pragma omp parallel for num_threads(max_threads) default(none)
-    // clang-format on
-    for ( size_t i = 0; i < population_size; ++i ) {
-      for ( unsigned j = 0; j < dimension; ++j ) {
-        hawks[i][j] = std::clamp( hawks[i][j], lower_bounds_vec[j], upper_bounds_vec[j] );
-      }
-    }
-
-    std::vector<double> fitness_values( population_size, std::numeric_limits<double>::infinity() );
-    // clang-format off
-    #pragma omp parallel for num_threads(max_threads) default(none)
-    // clang-format on
-    for ( size_t i = 0; i < population_size; ++i ) {
-      fitness_values[i] = this->ref_decoder.decode( hawks[i] );
-    }
-
-    double current_best_fitness = std::numeric_limits<double>::infinity();
-    size_t current_best_index   = 0;
-    for ( size_t i = 0; i < population_size; ++i ) {
-      if ( fitness_values[i] < current_best_fitness ) {
-        current_best_fitness = fitness_values[i];
-        current_best_index   = i;
-      }
-    }
-
-    if ( current_best_fitness < best_fitness ) {
-      best_fitness  = current_best_fitness;
-      best_position = hawks[current_best_index];
-    }
-
-    auto E1 = JUMP_STRENGTH_FACTOR * ( ESCAPE_ENERGY_BOUND_EXPLORATION -
-                                       static_cast<double>( iteration ) / max_iterations );
-
-    const auto hawks_prev = hawks;
-
-    // clang-format off
-    #pragma omp parallel for num_threads(max_threads) default(none)
-    // clang-format on
-    for ( size_t i = 0; i < population_size; ++i ) {
-      // energia de escape do coelho
-      double E0 = ( JUMP_STRENGTH_FACTOR * ref_rng.random_range( 0.0, 1.0 ) ) -
-                  ESCAPE_ENERGY_BOUND_EXPLORATION;
-      double escaping_energy = E1 * E0;
-
-      if ( std::abs( escaping_energy ) >= 1 ) {
-        // TODO: Fase de exploração
-
-      } else if ( std::abs( escaping_energy ) < 1 ) {
-        // TODO: Fase de transição
-      }
-    }
+    // TODO: Onde usar rng tem que ser sequencial
   }
 
 }  // namespace r3dp::hho

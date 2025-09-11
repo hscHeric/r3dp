@@ -16,7 +16,7 @@ namespace r3dp::hho {
          unsigned       max_iterations,
          unsigned       max_threads,
          const Decoder &ref_decoder,
-         core::RNG     &ref_rng );
+         core::RNG<>   &ref_rng );
 
     HHO( unsigned                   population_size,
          unsigned                   dimension,
@@ -25,7 +25,7 @@ namespace r3dp::hho {
          unsigned                   max_iterations,
          unsigned                   max_threads,
          const Decoder             &ref_decoder,
-         core::RNG                 &ref_rng );
+         core::RNG<>               &ref_rng );
 
     void                                     step();
     [[nodiscard]] const std::vector<double> &get_best_solution() const;
@@ -48,7 +48,7 @@ namespace r3dp::hho {
     unsigned                         iteration;
     std::vector<double>              convergence_curve;
 
-    core::RNG     &ref_rng;
+    core::RNG<>   &ref_rng;
     const Decoder &ref_decoder;
 
     std::vector<double> levy_flight( int d );
