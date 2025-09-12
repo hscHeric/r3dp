@@ -8,6 +8,7 @@
 
 #include <boost/graph/detail/adjacency_list.hpp>
 #include <chrono>
+#include <cstdint>
 #include <fstream>
 #include <limits>
 #include <nlohmann/json.hpp>
@@ -18,10 +19,10 @@
 
 namespace r3dp {
 
-  static long unsigned generate_random_seed() {
-    std::random_device                           rd;
-    std::mt19937_64                              gen( rd() );
-    std::uniform_int_distribution<long unsigned> dist;
+  static uint64_t generate_random_seed() {
+    std::random_device                      rd;
+    std::mt19937_64                         gen( rd() );
+    std::uniform_int_distribution<uint64_t> dist;
 
     return dist( gen );
   }
@@ -99,7 +100,7 @@ namespace r3dp {
     argv = app.ensure_utf8( argv );
     CLI11_PARSE( app, argc, argv );
 
-    long unsigned seed_to_use = generate_random_seed();
+    uint64_t      seed_to_use = generate_random_seed();
     brkga::MTRand rng( seed_to_use );
 
     auto [totalVertices, edges] = core::read_graph_from_file( file_path );
@@ -129,7 +130,7 @@ namespace r3dp {
 
       unsigned generation       = 0;
       auto     trial_start_time = std::chrono::steady_clock::now();
-      auto     per_trial_limit  = std::chrono::seconds( static_cast<long long>( time_limit ) );
+      auto     per_trial_limit  = std::chrono::seconds( static_cast<int64_t>( time_limit ) );
 
       double current_best_fitness_in_trial = std::numeric_limits<double>::max();
       std::vector<std::pair<double, double>> current_improvements;
