@@ -34,8 +34,8 @@ namespace r3dp::core {
     /**
      * @brief Construtor estático que cria um gerador semeado com entropia.
      *
-     * Este método utiliza `std::random_device` para obter sementes de alta qualidade
-     * para garantir um estado inicial imprevisível.
+     * Este método utiliza `std::random_device` para obter sementes de alta
+     * qualidade para garantir um estado inicial imprevisível.
      *
      * @return Uma nova instância de RNG.
      */
@@ -139,21 +139,6 @@ namespace r3dp::core {
     }
 
     /**
-     * @brief Gera um número de ponto flutuante aleatório em todo o seu domínio.
-     *
-     * A distribuição é uniforme, cobrindo o intervalo
-     * [numeric_limits<T>::lowest(), numeric_limits<T>::max()].
-     *
-     * @tparam T O tipo de ponto flutuante para o número aleatório.
-     * @return Um número de ponto flutuante aleatório.
-     */
-    template <std::floating_point T>
-    [[nodiscard]] T random() {
-      return std::uniform_real_distribution<T>{ std::numeric_limits<T>::lowest(),
-                                                std::numeric_limits<T>::max() }( engine_ );
-    }
-
-    /**
      * @brief Gera um número integral aleatório em um intervalo especificado.
      * @tparam T O tipo integral para o número aleatório.
      * @param min O limite inferior (inclusivo) do intervalo.
@@ -186,7 +171,24 @@ namespace r3dp::core {
     }
 
     /**
-     * @brief Gera um valor booleano aleatório com uma probabilidade de ser verdadeiro.
+     * @brief Gera um número de ponto flutuante aleatório em todo o seu domínio.
+     *
+     * A distribuição é uniforme, cobrindo o intervalo
+     * [0, 1].
+     *
+     * não há como cobrir toda a range de pontos flutuante
+     *
+     * @tparam T O tipo de ponto flutuante para o número aleatório.
+     * @return Um número de ponto flutuante aleatório.
+     */
+    template <std::floating_point T>
+    [[nodiscard]] T random() {
+      return random_range<T>( T( 0 ), T( 1 ) );
+    }
+
+    /**
+     * @brief Gera um valor booleano aleatório com uma probabilidade de ser
+     * verdadeiro.
      * @param p_true A probabilidade (entre 0.0 e 1.0) de o resultado ser `true`.
      * @return `true` com probabilidade `p_true`, caso contrário `false`.
      * @throw std::invalid_argument se `p_true` não estiver no intervalo [0, 1].
@@ -199,7 +201,8 @@ namespace r3dp::core {
     }
 
     /**
-     * @brief Gera um número de ponto flutuante com distribuição uniforme no intervalo [0, 1].
+     * @brief Gera um número de ponto flutuante com distribuição uniforme no
+     * intervalo [0, 1].
      * @tparam T O tipo de ponto flutuante, padrão é `double`.
      * @return Um número aleatório no intervalo [0, 1].
      */
@@ -290,7 +293,8 @@ namespace r3dp::core {
     }
 
     /**
-     * @brief Seleciona uma amostra aleatória de `k` índices de `n` elementos sem reposição.
+     * @brief Seleciona uma amostra aleatória de `k` índices de `n` elementos sem
+     * reposição.
      * @param n O número total de elementos.
      * @param k O tamanho da amostra.
      * @return Um `std::vector<size_t>` contendo `k` índices aleatórios únicos.
