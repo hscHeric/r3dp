@@ -64,4 +64,5 @@ namespace r3dp::brkga {
       return sum_of_labels;
     }
   };
+
 }  // namespace r3dp::brkga

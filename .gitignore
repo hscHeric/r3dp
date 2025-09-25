@@ -8,8 +8,6 @@ lib/
 # =========================
 # CMake / Conan / Compilação
 # =========================
-CMakeUserPresets.json
-compile_commands.json
 conanbuildinfo.*       # versões antigas do Conan
 conan.lock
 conanfile.lock

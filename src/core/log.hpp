@@ -1,25 +1,24 @@
 #pragma once
 
 namespace r3dp::core {
-#define DEBUG
 
 #ifdef DEBUG
   #define LOG_MESSAGE( msg ) \
-    std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << ( msg ) << std::endl;
+    std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << msg << std::endl;
 
-  #define LOG_VAR( var )                                                                        \
-    std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << #var << " = " << ( var ) \
+  #define LOG_VAR( var )                                                                    \
+    std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << #var << " = " << var \
               << std::endl;
 
   #define LOG_VECTOR( vec )                                                            \
     std::cout << "[DEBUG] " << __FILE__ << ":" << __LINE__ << " - " << #vec << " = ["; \
-    for ( const auto &elem : ( vec ) ) {                                               \
+    for ( const auto &elem : vec ) {                                                   \
       std::cout << elem << " ";                                                        \
     }                                                                                  \
     std::cout << "]" << std::endl;
 
   #define LOG_ERR( msg ) \
-    std::cerr << "[ERRO] " << __FILE__ << ":" << __LINE__ << " - " << ( msg ) << std::endl;
+    std::cerr << "[ERRO] " << __FILE__ << ":" << __LINE__ << " - " << msg << std::endl;
 
 #else
   #define LOG_MESSAGE( msg ) \
