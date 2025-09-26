@@ -15,8 +15,8 @@ namespace r3dp::core {
       { cp.dimension() } -> std::convertible_to<size_t>;
 
       // Limites devem ser vetores de double
-      { cp.lower_bounds() } -> std::same_as<std::vector<double>>;
-      { cp.upper_bounds() } -> std::same_as<std::vector<double>>;
+      { cp.lower_bounds() } -> std::same_as<const std::vector<double> &>;
+      { cp.upper_bounds() } -> std::same_as<const std::vector<double> &>;
 
       // Funções de encode/decode
       { cp.encode( g ) } -> std::same_as<std::vector<double>>;
