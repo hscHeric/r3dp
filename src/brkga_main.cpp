@@ -10,7 +10,6 @@
 #include <filesystem>
 #include <limits>
 #include <nlohmann/json.hpp>
-#include <optional>
 #include <random>
 #include <string>
 #include <utility>

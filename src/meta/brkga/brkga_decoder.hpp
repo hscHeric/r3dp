@@ -7,12 +7,12 @@
 namespace r3dp::brkga {
   class R3DPDecoder {
   private:
-    const core::Graph &graph;
+    const core::graph_t &graph;
 
   public:
-    explicit R3DPDecoder( const core::Graph &g ) : graph( g ) {}
+    explicit R3DPDecoder( const core::graph_t &g ) : graph( g ) {}
 
-    double decode( const std::vector<double> chromosome ) const {
+    [[nodiscard]] double decode( const std::vector<double> &chromosome ) const {
       const auto           size = boost::num_vertices( graph );
       std::vector<uint8_t> solution( size );
 
@@ -26,7 +26,7 @@ namespace r3dp::brkga {
 
         auto vertices = boost::vertices( graph );
         for ( auto v_it = vertices.first; v_it != vertices.second; ++v_it ) {
-          core::Vertex u = *v_it;
+          core::vertex_t u = *v_it;
 
           if ( solution[u] == 0 ) {
             int  neighbor_sum = 0;
