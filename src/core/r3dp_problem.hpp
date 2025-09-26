@@ -32,14 +32,10 @@ namespace r3dp::core {
     }
 
     [[nodiscard]] std::vector<double> encode( const genotype_type &geno ) const {
-      std::vector<double> k( dim );
-      for ( size_t i = 0; i < dim; ++i ) {
-        unsigned lab = std::min<unsigned>( geno[i], 3 );
-        k[i] = ( static_cast<double>( lab ) + 0.5 ) / 4.0;  // 0:0.125, 1:0.375, 2:0.625, 3:0.875
-      }
-      return k;
+      // TODO: Converte em uma função dentro do espeço que o algoritmo trabalha
     }
 
+    // Converte um conjunto de chaves vector<double> em uma função de dominação 3 romana
     [[nodiscard]] genotype_type decode( std::span<const double> keys ) const {
       genotype_type output;
       output.reserve( dim );
@@ -54,48 +50,11 @@ namespace r3dp::core {
     }
 
     [[nodiscard]] double evaluate( std::span<const double> keys ) const {
-      const auto   labels = decode( keys );
-      const size_t viol   = violation_count( labels );
-      const size_t s      = label_sum( labels );
-
-      return static_cast<double>( s ) + ( static_cast<double>( viol ) * penalty );
-    }
-
-    [[nodiscard]] static size_t label_sum( const genotype_type &labels ) {
-      size_t s = 0;
-      for ( auto v : labels ) {
-        s += static_cast<size_t>( v );
-      }
-      return s;
+      // TODO: Retorna o fitness de uma possivel solução
     }
 
     [[nodiscard]] size_t violation_count( const genotype_type &labels ) const {
-      size_t viol = 0;
-
-      using boost::adjacent_vertices;
-      using boost::vertices;
-
-      auto [it, end] = vertices( *graph );
-      for ( ; it != end; ++it ) {
-        const auto v = static_cast<size_t>( *it );
-        if ( labels[v] != 0 ) {
-          continue;
-        }
-
-        bool has_neighbor_ge3 = false;
-        auto [nb, nb_end]     = adjacent_vertices( *it, *graph );
-        for ( ; nb != nb_end; ++nb ) {
-          const auto u = static_cast<size_t>( *nb );
-          if ( labels[u] >= 3 ) {
-            has_neighbor_ge3 = true;
-            break;
-          }
-        }
-        if ( !has_neighbor_ge3 ) {
-          ++viol;
-        }
-      }
-      return viol;
+      // TODO: Retorna o número de vértices que não seguem a restrição
     }
 
   private:
