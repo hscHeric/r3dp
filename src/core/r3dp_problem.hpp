@@ -119,6 +119,6 @@ namespace r3dp::core {
     std::vector<double> hi;
   };
 
-  static_assert( Problem<r3dp_problem>,
+  static_assert( problem<r3dp_problem>,
                  "A classe r3dp_problem deve atender ao conceito de Problem." );
 }  // namespace r3dp::core

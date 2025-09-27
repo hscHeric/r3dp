@@ -6,7 +6,7 @@
 
 namespace r3dp::core {
   template <typename P>
-  concept Problem =
+  concept problem =
     requires( const P &cp, typename P::genotype_type g, std::span<const double> keys ) {
       // Assegura que o tipo de genótipo está definido
       typename P::genotype_type;
