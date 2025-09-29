@@ -86,5 +86,5 @@ add_executable(brkga_main src/brkga_main.cpp)
 target_link_libraries(brkga_main PRIVATE r3dp::brkga)
 
 # Exemplo que usa tudo
-add_executable(rng_example examples/rng_example.cpp)
-target_link_libraries(rng_example PRIVATE r3dp::all)
+#add_executable(rng_example examples/rng_example.cpp)
+#target_link_libraries(rng_example PRIVATE r3dp::all)
